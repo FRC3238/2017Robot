@@ -21,4 +21,9 @@ public class Constants
     {
         public static final int MAIN_JOYSTICK_PORT = 0;
     }
+    
+    public class Climber
+    {
+        public static final int CLIMBER_ACTIVATION_BUTTON = 1;
+    }
 }
