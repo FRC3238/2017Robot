@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="EclipseModuleManager">
+    <varelement var="jar://$wpilib$!/" value="wpilib" />
+    <varelement var="jar://$wpilib.sources$!/" kind="src:" value="wpilib.sources" />
+    <varelement var="jar://$networktables$!/" value="networktables" />
+    <varelement var="jar://$networktables.sources$!/" kind="src:" value="networktables.sources" />
+    <varelement var="file://$opencv$" value="opencv" />
+    <varelement var="file://$opencv.sources$" kind="src:" value="opencv.sources" />
+    <varelement var="file://$cscore$" value="cscore" />
+    <varelement var="file://$cscore.sources$" kind="src:" value="cscore.sources" />
+    <varelement var="file://$USERLIBS_DIR$/navx_frc.jar" value="USERLIBS_DIR/navx_frc.jar" />
+    <varelement var="file://$USERLIBS_DIR$/TalonSRXLibJava.jar" value="USERLIBS_DIR/TalonSRXLibJava.jar" />
+    <src_description expected_position="0">
+      <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
+    </src_description>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/bin" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="jdk" jdkName="WPILibJava1.8" jdkType="JavaSDK" />
+  </component>
+</module>
