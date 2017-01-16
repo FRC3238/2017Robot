@@ -23,5 +23,31 @@
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="jdk" jdkName="WPILibJava1.8" jdkType="JavaSDK" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/wpilib/java/current/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$USER_HOME$/wpilib/java/current/lib" />
+        </SOURCES>
+        <jarDirectory url="file://$USER_HOME$/wpilib/java/current/lib" recursive="false" />
+        <jarDirectory url="file://$USER_HOME$/wpilib/java/current/lib" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/wpilib/user/java/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <NATIVE>
+          <root url="file://$USER_HOME$/wpilib/user/java/lib" />
+        </NATIVE>
+        <SOURCES />
+        <jarDirectory url="file://$USER_HOME$/wpilib/user/java/lib" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>
