@@ -18,11 +18,11 @@ public class Robot extends IterativeRobot {
     
     @Override
     public void robotInit() {
-        driveLeftTalonA = new CANTalon(1);
-        driveLeftTalonB = new CANTalon(2);
-        driveRightTalonA = new CANTalon(3);
-        driveRightTalonB = new CANTalon(4);
-        joystick = new Joystick(1);
+        driveLeftTalonA = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_A);
+        driveLeftTalonB = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_B);
+        driveRightTalonA = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_RIGHT_A);
+        driveRightTalonB = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_RIGHT_B);
+        joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
         chassis = new Chassis(driveLeftTalonA, driveLeftTalonB, driveRightTalonA, driveRightTalonB, joystick);
     }
 
