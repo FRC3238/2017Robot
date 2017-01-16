@@ -2,13 +2,13 @@
 <module type="JAVA_MODULE" version="4">
   <component name="EclipseModuleManager">
     <varelement var="jar://$wpilib$!/" value="wpilib" />
-    <varelement var="jar://$wpilib.sources$!/" kind="src:" value="wpilib.sources" />
+    <varelement var="jar://$wpilib.sources$!/" value="src:wpilib.sources" />
     <varelement var="jar://$networktables$!/" value="networktables" />
-    <varelement var="jar://$networktables.sources$!/" kind="src:" value="networktables.sources" />
+    <varelement var="jar://$networktables.sources$!/" value="src:networktables.sources" />
     <varelement var="file://$opencv$" value="opencv" />
-    <varelement var="file://$opencv.sources$" kind="src:" value="opencv.sources" />
+    <varelement var="file://$opencv.sources$" value="src:opencv.sources" />
     <varelement var="file://$cscore$" value="cscore" />
-    <varelement var="file://$cscore.sources$" kind="src:" value="cscore.sources" />
+    <varelement var="file://$cscore.sources$" value="src:cscore.sources" />
     <varelement var="file://$USERLIBS_DIR$/navx_frc.jar" value="USERLIBS_DIR/navx_frc.jar" />
     <varelement var="file://$USERLIBS_DIR$/TalonSRXLibJava.jar" value="USERLIBS_DIR/TalonSRXLibJava.jar" />
     <src_description expected_position="0">
@@ -22,6 +22,29 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="jdk" jdkName="WPILibJava1.8" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/wpilib/java/current/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$USER_HOME$/wpilib/java/current/lib" />
+        </SOURCES>
+        <jarDirectory url="file://$USER_HOME$/wpilib/java/current/lib" recursive="false" />
+        <jarDirectory url="file://$USER_HOME$/wpilib/java/current/lib" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/wpilib/user/java/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$USER_HOME$/wpilib/user/java/lib" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>
