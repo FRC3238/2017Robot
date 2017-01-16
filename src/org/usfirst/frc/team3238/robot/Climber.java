@@ -24,8 +24,17 @@ public class Climber
     {
         if(joy.getRawButton(Constants.Climber.CLIMBER_ACTIVATION_BUTTON))
         {
-            climbTalonOne.set(1.0);
-            climbTalonTwo.set(1.0);
+            climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE );
+            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE );
+        }
+        else if (joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
+        {
+            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
+            climbTalonOne.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
+        }
+        else{
+            climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
+            climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
         }
     }
 }

@@ -25,5 +25,9 @@ public class Constants
     public class Climber
     {
         public static final int CLIMBER_ACTIVATION_BUTTON = 1;
+        public static final int CLIMBER_GO_DOWN_BUTTON = 2;
+        public static final int CLIMBER_GO_UP_VALUE = 1;
+        public static final int CLIMBER_GO_DOWN_VALUE = -1;
+        public static final int CLIMBER_INACTIVE_VALUE = 0;
     }
 }
