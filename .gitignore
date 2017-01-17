@@ -64,4 +64,4 @@ $RECYCLE.BIN/
 
 # IntelliJ IDEA files
 .idea/
-2017Robot.iml
+*.iml
