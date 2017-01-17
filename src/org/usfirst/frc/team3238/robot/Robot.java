@@ -15,7 +15,9 @@ public class Robot extends IterativeRobot {
     Chassis chassis;
     Joystick joystick;
     CANTalon driveLeftTalonA, driveLeftTalonB, driveRightTalonA, driveRightTalonB;
-    
+    Climber climber;
+    CANTalon climbTalonOne, climbTalonTwo;
+    Joystick joy;
     @Override
     public void robotInit() {
         driveLeftTalonA = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_A);
@@ -24,6 +26,11 @@ public class Robot extends IterativeRobot {
         driveRightTalonB = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_RIGHT_B);
         joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
         chassis = new Chassis(driveLeftTalonA, driveLeftTalonB, driveRightTalonA, driveRightTalonB, joystick);
+
+        climbTalonOne = new CANTalon(Constants.Climber.CLIMB_TALON_ONE_ID);
+        climbTalonTwo = new CANTalon(Constants.Climber.CLIMB_TALON_TWO_ID);
+        joy = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
+        climber = new Climber(climbTalonOne,climbTalonTwo,joy);
     }
 
     @Override
@@ -49,7 +56,7 @@ public class Robot extends IterativeRobot {
     @Override
     public void teleopPeriodic() {
     chassis.run();
-    
+    climber.run();
     }
 
     @Override

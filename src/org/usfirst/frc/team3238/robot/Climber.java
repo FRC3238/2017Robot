@@ -4,16 +4,18 @@ import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 
 /**
- * Created by BUTLEJEF000 on 1/16/2017.
+ * Created by Jefferson on 1/16/2017.
  */
 public class Climber
 {
     CANTalon climbTalonOne, climbTalonTwo;
     Joystick joy;
     
-    Climber(CANTalon climbTalonOne, CANTalon climbTalonTwo)
+    Climber(CANTalon climbTalonOne, CANTalon climbTalonTwo, Joystick joy)
     {
-        
+        this.joy = joy;
+        this.climbTalonOne = climbTalonOne;
+        this.climbTalonTwo = climbTalonTwo;
         climbTalonOne.setInverted(false);
         climbTalonTwo.setInverted(true);
         climbTalonOne.set(0.0);
@@ -24,15 +26,14 @@ public class Climber
     {
         if(joy.getRawButton(Constants.Climber.CLIMBER_ACTIVATION_BUTTON))
         {
-            climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE );
-            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE );
-        }
-        else if (joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
+            climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+        } else if(joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
         {
             climbTalonTwo.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
             climbTalonOne.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
-        }
-        else{
+        } else
+        {
             climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
             climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
         }

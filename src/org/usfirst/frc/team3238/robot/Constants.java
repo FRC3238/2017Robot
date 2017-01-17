@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import java.security.PublicKey;
 
 /**
- * Created by BUTLEJEF000 on 1/16/2017.
+ * Created by Jefferson on 1/16/2017.
  */
 public class Constants
 {
@@ -24,6 +24,8 @@ public class Constants
     
     public class Climber
     {
+        public static final int CLIMB_TALON_ONE_ID = 1;
+        public static final int CLIMB_TALON_TWO_ID = 2;
         public static final int CLIMBER_ACTIVATION_BUTTON = 1;
         public static final int CLIMBER_GO_DOWN_BUTTON = 2;
         public static final int CLIMBER_GO_UP_VALUE = 1;
