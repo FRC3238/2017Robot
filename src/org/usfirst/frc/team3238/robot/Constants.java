@@ -23,8 +23,10 @@ public class Constants
     {
         public static final int CLIMB_TALON_ONE_ID = 1;
         public static final int CLIMB_TALON_TWO_ID = 2;
+        
         public static final int CLIMBER_ACTIVATION_BUTTON = 1;
         public static final int CLIMBER_GO_DOWN_BUTTON = 2;
+        
         public static final int CLIMBER_GO_UP_VALUE = 1;
         public static final int CLIMBER_GO_DOWN_VALUE = -1;
         public static final int CLIMBER_INACTIVE_VALUE = 0;
@@ -35,16 +37,17 @@ public class Constants
         public static final int LEFT_TALON_ID = 5;
         public static final int RIGHT_TALON_ID = 6;
         public static final int LIFT_TALON_ID = 7;
+        public static final int LIMIT_CHANNEL = 0;
         
         public static final double ENCODER_COUNT_PER_DEGREE = 1;
         public static final int ALLOWABLE_ERROR = 5;
         public static final double LIFT_P_CONST = 0.1;
         public static final double LIFT_I_CONST = 0.0;
         public static final double LIFT_D_CONST = 0.0;
+        
         public static final double INTAKE_POWER = 0.6;
         public static final double FEED_INTAKE_POWER = 0.3;
         public static final double RAISE_INTAKE_POWER = -0.4;
         public static final double RAISE_SECONDS = 1.0;
-        public static final int LIMIT_CHANNEL = 0;
     }
 }
