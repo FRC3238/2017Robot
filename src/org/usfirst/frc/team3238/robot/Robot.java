@@ -9,9 +9,11 @@ public class Robot extends IterativeRobot
 {
     Chassis chassis;
     Collector collector;
+    Climber climber;
     DigitalInput collectLimit;
     Joystick joystick;
     CANTalon driveLeftTalonA, driveLeftTalonB, driveRightTalonA, driveRightTalonB;
+    CANTalon climbTalonOne, climbTalonTwo;
     CANTalon leftCollect, rightCollect, liftCollect;
     
     @Override public void robotInit()
@@ -25,8 +27,11 @@ public class Robot extends IterativeRobot
         leftCollect = new CANTalon(Constants.Collector.LEFT_TALON_ID);
         rightCollect = new CANTalon(Constants.Collector.RIGHT_TALON_ID);
         liftCollect = new CANTalon(Constants.Collector.LIFT_TALON_ID);
+        climbTalonOne = new CANTalon(Constants.Climber.CLIMB_TALON_ONE_ID);
+        climbTalonTwo = new CANTalon(Constants.Climber.CLIMB_TALON_TWO_ID);
         collectLimit = new DigitalInput(Constants.Collector.LIMIT_CHANNEL);
         joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
+        climber = new Climber(climbTalonOne,climbTalonTwo,joystick);
         chassis = new Chassis(driveLeftTalonA, driveLeftTalonB,
                 driveRightTalonA, driveRightTalonB, joystick);
         collector = new Collector(leftCollect, rightCollect, liftCollect,
@@ -57,6 +62,7 @@ public class Robot extends IterativeRobot
     {
         chassis.run();
         collector.run();
+      climber.run();
     }
     
     @Override public void testInit()

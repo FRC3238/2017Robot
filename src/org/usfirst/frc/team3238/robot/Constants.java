@@ -1,7 +1,7 @@
 package org.usfirst.frc.team3238.robot;
 
 /**
- * Created by BUTLEJEF000 on 1/16/2017.
+ * Created by Jefferson on 1/16/2017.
  */
 public class Constants
 {
@@ -18,6 +18,18 @@ public class Constants
         public static final int MAIN_JOYSTICK_PORT = 0;
     }
     
+
+    public class Climber
+    {
+        public static final int CLIMB_TALON_ONE_ID = 1;
+        public static final int CLIMB_TALON_TWO_ID = 2;
+        public static final int CLIMBER_ACTIVATION_BUTTON = 1;
+        public static final int CLIMBER_GO_DOWN_BUTTON = 2;
+        public static final int CLIMBER_GO_UP_VALUE = 1;
+        public static final int CLIMBER_GO_DOWN_VALUE = -1;
+        public static final int CLIMBER_INACTIVE_VALUE = 0;
+    }
+  
     public class Collector
     {
         public static final int LEFT_TALON_ID = 5;
