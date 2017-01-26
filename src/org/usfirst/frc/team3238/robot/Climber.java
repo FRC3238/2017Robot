@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Joystick;
  */
 public class Climber
 {
+    String state;
     CANTalon climbTalonOne, climbTalonTwo;
     Joystick joy;
     
@@ -20,19 +21,32 @@ public class Climber
         climbTalonTwo.setInverted(true);
         climbTalonOne.set(0.0);
         climbTalonTwo.set(0.0);
+        state = "disabled";
     }
     
     public void run()
     {
         if(joy.getRawButton(Constants.Climber.CLIMBER_ACTIVATION_BUTTON))
         {
+            state = "pulling";
+        } else if(joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
+        {
+            state = "releasing"
+
+        } else if(joy.getRawButton(Constants.Climber.CLIMBER_KILL_BUTTON))
+        {
+            state = "disabled"
+        }
+        if(state.equals("pulling"))
+        {
             climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
             climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-        } else if(joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
+        } else if(state.equals("releasing"))
         {
             climbTalonTwo.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
             climbTalonOne.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
-        } else
+
+        } else if(state.equals("disabled"))
         {
             climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
             climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
