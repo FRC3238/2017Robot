@@ -11,27 +11,35 @@ public class Chassis
 {
     RobotDrive driveTrain;
     
-//    CANTalon leftTalonA, leftTalonB, rightTalonA, rightTalonB;
+    CANTalon leftTalonA, leftTalonB, rightTalonA, rightTalonB;
     
     Joystick joy;
     
     Chassis(CANTalon leftTalonA, CANTalon leftTalonB, CANTalon rightTalonA,
             CANTalon rightTalonB, Joystick joy)
     {
-//        this.leftTalonA = leftTalonA;
-//        this.leftTalonB = leftTalonB;
-//        this.rightTalonB = rightTalonB;
-//        this.rightTalonA = rightTalonA;
+        this.leftTalonA = leftTalonA;
+        this.leftTalonB = leftTalonB;
+        this.rightTalonB = rightTalonB;
+        this.rightTalonA = rightTalonA;
         this.joy = joy;
         
-        driveTrain = new RobotDrive(leftTalonA, leftTalonB, rightTalonA, rightTalonB);
+        driveTrain = new RobotDrive(leftTalonA, leftTalonB, rightTalonA,
+                rightTalonB);
     }
     
-    public void run(){
-        driveTrain.arcadeDrive(joy.getY(), joy.getTwist());
+    public void run()
+    {
+        driveTrain.arcadeDrive(joy.getY() > Constants.Chassis.DEADZONE
+                        || joy.getY() < Constants.Chassis.DEADZONE ? joy.getY() : 0.0,
+                joy.getTwist() > Constants.Chassis.DEADZONE
+                        || joy.getY() < Constants.Chassis.DEADZONE ?
+                        -joy.getTwist() :
+                        0.0);
     }
     
-    public void autoRun (double y, double twist){
+    public void autoRun(double y, double twist)
+    {
         driveTrain.arcadeDrive(y, twist);
     }
 }

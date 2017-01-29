@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Joystick;
  */
 public class Climber
 {
+    String state;
     CANTalon climbTalonOne, climbTalonTwo;
     Joystick joy;
     
@@ -16,10 +17,9 @@ public class Climber
         this.joy = joy;
         this.climbTalonOne = climbTalonOne;
         this.climbTalonTwo = climbTalonTwo;
-        climbTalonOne.setInverted(false);
-        climbTalonTwo.setInverted(true);
         climbTalonOne.set(0.0);
         climbTalonTwo.set(0.0);
+        state = "disabled";
     }
     
     public void run()
@@ -28,14 +28,20 @@ public class Climber
         {
             climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
             climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-        } else if(joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
+        } else if(joy.getRawButton(Constants.Climber.CLIMBER_KILL_BUTTON))
         {
-            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
-            climbTalonOne.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
-        } else
+            state = "disabled";
+        }
+        switch(state)
         {
-            climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
-            climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
+            case "pulling":
+                climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+                climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+                break;
+            case "disabled":
+                climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
+                climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
+                break;
         }
     }
 }
