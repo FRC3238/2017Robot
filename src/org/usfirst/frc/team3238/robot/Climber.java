@@ -26,8 +26,7 @@ public class Climber
     {
         if(joy.getRawButton(Constants.Climber.CLIMBER_ACTIVATION_BUTTON))
         {
-            climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+            state = "pulling";
         } else if(joy.getRawButton(Constants.Climber.CLIMBER_KILL_BUTTON))
         {
             state = "disabled";
