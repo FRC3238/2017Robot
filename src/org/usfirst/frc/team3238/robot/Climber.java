@@ -17,8 +17,6 @@ public class Climber
         this.joy = joy;
         this.climbTalonOne = climbTalonOne;
         this.climbTalonTwo = climbTalonTwo;
-        climbTalonOne.setInverted(false);
-        climbTalonTwo.setInverted(true);
         climbTalonOne.set(0.0);
         climbTalonTwo.set(0.0);
         state = "disabled";
@@ -29,27 +27,20 @@ public class Climber
         if(joy.getRawButton(Constants.Climber.CLIMBER_ACTIVATION_BUTTON))
         {
             state = "pulling";
-        } else if(joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
-        {
-            state = "releasing"
-
         } else if(joy.getRawButton(Constants.Climber.CLIMBER_KILL_BUTTON))
         {
-            state = "disabled"
+            state = "disabled";
         }
-        if(state.equals("pulling"))
+        switch(state)
         {
-            climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-        } else if(state.equals("releasing"))
-        {
-            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
-            climbTalonOne.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
-
-        } else if(state.equals("disabled"))
-        {
-            climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
-            climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
+            case "pulling":
+                climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+                climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+                break;
+            case "disabled":
+                climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
+                climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
+                break;
         }
     }
 }
