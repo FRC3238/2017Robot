@@ -7,12 +7,14 @@ import edu.wpi.first.wpilibj.RobotDrive;
 /**
  * Created by BUTLEJEF000 on 1/16/2017.
  */
-public class Chassis {
-
+public class Chassis
+{
+    RobotDrive driveTrain;
+    
     CANTalon leftTalonA, leftTalonB, rightTalonA, rightTalonB;
-
+    
     Joystick joy;
-
+    
     Chassis(CANTalon leftTalonA, CANTalon leftTalonB, CANTalon rightTalonA,
             CANTalon rightTalonB, Joystick joy)
     {

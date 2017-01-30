@@ -22,6 +22,19 @@ public class Climber
         state = "disabled";
     }
     
+    public void allowReverse()
+    {
+        if(joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
+        {
+            climbTalonOne.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
+            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
+        } else
+        {
+            climbTalonOne.set(0.0);
+            climbTalonTwo.set(0.0);
+        }
+    }
+    
     public void run()
     {
         if(joy.getRawButton(Constants.Climber.CLIMBER_ACTIVATION_BUTTON))

@@ -12,6 +12,10 @@ public class Constants
         public static final int DRIVE_TALON_ID_LEFT_A = 3;
         public static final int DRIVE_TALON_ID_LEFT_B = 4;
         public static final double DEADZONE = 0.25;
+        public static final double TWIST_DEADZONE = 0.4;
+        
+        public static final double TWIST_SCALE = 1.0;
+        public static final double MOVE_SCALE = 1.0;
     }
     
     public class Robot
@@ -39,22 +43,21 @@ public class Constants
         public static final int LEFT_TALON_ID = 6;
         public static final int RIGHT_TALON_ID = 7;
         public static final int LIFT_TALON_ID = 5;
-        public static final int LIMIT_CHANNEL = 1;
         
-//        public static final double ENCODER_COUNT_PER_DEGREE = 1;
-//        public static final int ALLOWABLE_ERROR = 5;
-//        public static final double LIFT_P_CONST = 0.1;
-//        public static final double LIFT_I_CONST = 0.0;
-//        public static final double LIFT_D_CONST = 0.0;
-        
-        public static final int COLLECT_RAISE_BUTTON = 180;
-        public static final int COLLECT_LOWER_BUTTON = 0;
+        public static final int COLLECT_RAISE_BUTTON = 0;
+        public static final int COLLECT_LOWER_BUTTON = 180;
         public static final int COLLECT_IN_BUTTON = 3;
         public static final int COLLECT_OUT_BUTTON = 5;
+        public static final int COLLECT_GROUND_BUTTON = 2;
+        public static final int COLLECT_FEED_BUTTON = 3;
+        public static final int DISABLE_BUTTON = 11;
         
         public static final double INTAKE_POWER = 0.6;
         public static final double FEED_INTAKE_POWER = 0.3;
         public static final double RAISE_INTAKE_POWER = -0.4;
+        public static final double RAISE_POWER = 0.5;
+        public static final double LOWER_POWER = -0.5;
+        
         public static final double RAISE_SECONDS = 1.0;
     }
 }
