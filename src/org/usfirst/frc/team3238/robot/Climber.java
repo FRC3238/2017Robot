@@ -6,11 +6,10 @@ import edu.wpi.first.wpilibj.Joystick;
 /**
  * Created by Jefferson on 1/16/2017.
  */
-public class Climber
+class Climber
 {
-    String state;
-    CANTalon climbTalonOne, climbTalonTwo;
-    Joystick joy;
+    private CANTalon climbTalonOne, climbTalonTwo;
+    private Joystick joy;
     
     Climber(CANTalon climbTalonOne, CANTalon climbTalonTwo, Joystick joy)
     {
@@ -19,42 +18,34 @@ public class Climber
         this.climbTalonTwo = climbTalonTwo;
         climbTalonOne.set(0.0);
         climbTalonTwo.set(0.0);
-        state = "disabled";
     }
     
-    public void allowReverse()
+    void run()
     {
-        if(joy.getRawButton(Constants.Climber.CLIMBER_GO_DOWN_BUTTON))
+        climbTalonOne.enableBrakeMode(true);
+        climbTalonTwo.enableBrakeMode(true);
+        if(joy.getRawButton(Constants.Climber.CLIMBER_UP_BUTTON))
         {
-            climbTalonOne.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
-            climbTalonTwo.set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
+            set(Constants.Climber.CLIMBER_GO_UP_VALUE);
+        } else if(joy.getRawButton(Constants.Climber.CLIMBER_DOWN_BUTTON))
+        {
+            set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
         } else
         {
-            climbTalonOne.set(0.0);
-            climbTalonTwo.set(0.0);
+            set(0.0);
         }
     }
     
-    public void run()
+    private void set(double power)
     {
-        if(joy.getRawButton(Constants.Climber.CLIMBER_ACTIVATION_BUTTON))
-        {
-            state = "pulling";
-        } else if(joy.getRawButton(Constants.Climber.CLIMBER_KILL_BUTTON))
-        {
-            state = "disabled";
-        }
-        switch(state)
-        {
-            case "pulling":
-                climbTalonOne.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-                climbTalonTwo.set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-                break;
-            case "disabled":
-                climbTalonOne.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
-                climbTalonTwo.set(Constants.Climber.CLIMBER_INACTIVE_VALUE);
-                break;
-        }
+        climbTalonOne.set(power);
+        climbTalonTwo.set(power);
+    }
+    
+    void disabled()
+    {
+        climbTalonOne.enableBrakeMode(false);
+        climbTalonTwo.enableBrakeMode(false);
     }
 }
 

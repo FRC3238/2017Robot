@@ -9,19 +9,13 @@ import edu.wpi.first.wpilibj.RobotDrive;
  */
 public class Chassis
 {
-    RobotDrive driveTrain;
+    private RobotDrive driveTrain;
     
-    CANTalon leftTalonA, leftTalonB, rightTalonA, rightTalonB;
-    
-    Joystick joy;
+    private Joystick joy;
     
     Chassis(CANTalon leftTalonA, CANTalon leftTalonB, CANTalon rightTalonA,
             CANTalon rightTalonB, Joystick joy)
     {
-        this.leftTalonA = leftTalonA;
-        this.leftTalonB = leftTalonB;
-        this.rightTalonB = rightTalonB;
-        this.rightTalonA = rightTalonA;
         this.joy = joy;
         
         driveTrain = new RobotDrive(leftTalonA, leftTalonB, rightTalonA,
@@ -30,12 +24,23 @@ public class Chassis
     
     public void run()
     {
-        driveTrain.arcadeDrive(joy.getY() > Constants.Chassis.DEADZONE
-                        || joy.getY() < Constants.Chassis.DEADZONE ? joy.getY() : 0.0,
-                joy.getTwist() > Constants.Chassis.DEADZONE
-                        || joy.getY() < Constants.Chassis.DEADZONE ?
-                        -joy.getTwist() :
-                        0.0);
+        double y;
+        if(Math.abs(joy.getY()) >= Constants.Chassis.DEADZONE)
+        {
+            y = joy.getY() * Constants.Chassis.MOVE_SCALE;
+        } else
+        {
+            y = 0.0;
+        }
+        double twist;
+        if(Math.abs(joy.getTwist()) >= Constants.Chassis.TWIST_DEADZONE)
+        {
+            twist = joy.getTwist() * Constants.Chassis.TWIST_SCALE;
+        } else
+        {
+            twist = 0.0;
+        }
+        autoRun(y, twist);
     }
     
     public void autoRun(double y, double twist)

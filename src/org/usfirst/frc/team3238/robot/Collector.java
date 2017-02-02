@@ -1,34 +1,28 @@
 package org.usfirst.frc.team3238.robot;
 
 import com.ctre.CANTalon;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
- * Created by aaron on 1/16/2017.
+ * Class to control Gear Collector
+ *
+ * @author aaron
+ * @version 1.0
  */
-public class Collector
+class Collector
 {
-    CANTalon leftIntake;
-    CANTalon rightIntake;
-    CANTalon lift;
-    Joystick joy;
+    private CANTalon leftIntake, rightIntake;
+    private CANTalon lift;
+    private Joystick joy;
     
-    Timer timer;
-    String state;
+    private Timer timer;
+    private String state;
     
-    public Collector(CANTalon leftIntake, CANTalon rightIntake, CANTalon lift,
+    Collector(CANTalon leftIntake, CANTalon rightIntake, CANTalon lift,
             Joystick joy)
     {
         leftIntake.enableLimitSwitch(false, false);
-        
-        rightIntake.changeControlMode(CANTalon.TalonControlMode.Follower);
-        rightIntake.setInverted(true);
-        rightIntake.set(leftIntake.getDeviceID());
         
         this.leftIntake = leftIntake;
         this.rightIntake = rightIntake;
@@ -39,28 +33,28 @@ public class Collector
         state = "inactive";
     }
     
-    public void init()
+    void init()
     {
         state = "inactive";
     }
     
-    public void run()
+    void run()
     {
         switch(state)
         {
             case "inactive": // Not moving
-                if(joy.getRawButton(Constants.Collector.COLLECT_IN_BUTTON))
-                    setIntake(Constants.Collector.FEED_INTAKE_POWER);
-                else if(joy
-                        .getRawButton(Constants.Collector.COLLECT_OUT_BUTTON))
+                if(joy.getRawButton(Constants.Collector.COLLECT_IN_POV))
                     setIntake(-Constants.Collector.FEED_INTAKE_POWER);
+                else if(joy
+                        .getRawButton(Constants.Collector.COLLECT_OUT_POV))
+                    setIntake(Constants.Collector.FEED_INTAKE_POWER);
                 else
                     setIntake(0.0);
-                if(joy.getPOV() == Constants.Collector.COLLECT_RAISE_BUTTON)
-                    lift.set(0.5);
+                if(joy.getPOV() == Constants.Collector.COLLECT_RAISE_POV)
+                    lift.set(Constants.Collector.RAISE_POWER);
                 else if(joy.getPOV()
-                        == Constants.Collector.COLLECT_LOWER_BUTTON)
-                    lift.set(-0.5);
+                        == Constants.Collector.COLLECT_LOWER_POV)
+                    lift.set(Constants.Collector.LOWER_POWER);
                 else
                     lift.set(0.0);
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
@@ -84,10 +78,20 @@ public class Collector
                         "collecting ground");
                 watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
                 break;
+            case "raise":
+                setIntake(0.0);
+                lift.set(Constants.Collector.RAISE_POWER);
+                watchUpperLimit("inactive");
+                watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
+                        "collecting ground");
+                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
+                        "collecting feed");
+                watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
+                break;
             case "raising": // Raising lift
                 lift.set(Constants.Collector.RAISE_POWER);
                 setIntake(0.0);
-                watchLimit("raising done");
+                watchUpperLimit("raising done");
                 watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
@@ -110,6 +114,7 @@ public class Collector
     private void setIntake(double power)
     {
         leftIntake.set(power);
+        rightIntake.set(-power);
     }
     
     private void resetTime()
@@ -131,6 +136,7 @@ public class Collector
     {
         if(joy.getRawButton(button))
         {
+            resetTime();
             this.state = state;
         }
     }
@@ -139,6 +145,16 @@ public class Collector
     {
         if(leftIntake.isRevLimitSwitchClosed())
         {
+            resetTime();
+            this.state = state;
+        }
+    }
+    
+    private void watchUpperLimit(String state)
+    {
+        if(lift.isRevLimitSwitchClosed())
+        {
+            resetTime();
             this.state = state;
         }
     }
@@ -147,6 +163,7 @@ public class Collector
     {
         if(joy.getPOV() == pov)
         {
+            resetTime();
             this.state = state;
         }
     }
