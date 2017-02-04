@@ -10,10 +10,10 @@ public class Constants
         public static final int DRIVE_TALON_ID_LEFT_A = 3;
         public static final int DRIVE_TALON_ID_LEFT_B = 4;
         public static final double DEADZONE = 0.25;
-        public static final double TWIST_DEADZONE = 0.4;
+        public static final double TWIST_DEADZONE = 0.3;
         
         public static final double TWIST_SCALE = -0.5;
-        public static final double MOVE_SCALE = 0.6;
+        public static final double MOVE_SCALE = 0.8;
     }
     
     public class Robot

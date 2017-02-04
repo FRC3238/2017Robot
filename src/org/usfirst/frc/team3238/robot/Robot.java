@@ -58,6 +58,7 @@ public class Robot extends IterativeRobot
         collector.run();
         climber.run();
     }
+
     
     @Override public void testInit()
     {
@@ -66,7 +67,9 @@ public class Robot extends IterativeRobot
     
     @Override public void testPeriodic()
     {
-        
+     chassis.proRun();
+     collector.run();
+     climber.run();
     }
 }
 
