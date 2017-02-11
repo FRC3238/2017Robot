@@ -36,7 +36,7 @@ public class Robot extends IterativeRobot
     {
         climber.disabled();
     }
-    
+
     @Override public void autonomousInit()
     {
         
@@ -67,7 +67,7 @@ public class Robot extends IterativeRobot
     
     @Override public void testPeriodic()
     {
-     chassis.proRun();
+     chassis.run();
      collector.run();
      climber.run();
     }

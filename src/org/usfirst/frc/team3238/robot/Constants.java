@@ -12,8 +12,8 @@ public class Constants
         public static final double DEADZONE = 0.25;
         public static final double TWIST_DEADZONE = 0.3;
         
-        public static final double TWIST_SCALE = -0.5;
-        public static final double MOVE_SCALE = 0.8;
+        public static final double TWIST_SCALE = -0.6;
+        public static final double MOVE_SCALE = 0.6;
     }
     
     public class Robot
@@ -41,21 +41,19 @@ public class Constants
         
         public static final int COLLECT_RAISE_POV = 180;
         public static final int COLLECT_LOWER_POV = 0;
+        public static final int COLLECT_LOWER_BUTTON = 1;
         public static final int COLLECT_IN_POV = 270;
         public static final int COLLECT_OUT_POV = 90;
         public static final int COLLECT_GROUND_BUTTON = 2;
-        public static final int COLLECT_FEED_BUTTON = 1;
-        public static final int EJECT_GEAR_BUTTON = 5;
+        public static final int RAISE_LIFT_BUTTON = 5;
         public static final int DISABLE_BUTTON = 3;
+
         
         
-        public static final double INTAKE_POWER = -0.4;
-        public static final double FEED_INTAKE_POWER = -0.4;
-        public static final double RAISE_INTAKE_POWER = 0.3;
-        public static final double RAISE_POWER = -0.4;
-        public static final double LOWER_POWER = 0.4;
-        
-        public static final double RAISE_SECONDS = 0.5;
+        public static final double INTAKE_POWER = -0.4;     //-0.4
+        public static final double FEED_INTAKE_POWER = -0.4;    // 0.4
+        public static final double RAISE_POWER = -0.6;      //-0.4
+        public static final double LOWER_POWER = 0.6;       //0.4
     }
     
     public class Shooter

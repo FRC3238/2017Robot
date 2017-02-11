@@ -22,50 +22,32 @@ public class Chassis
         driveTrain = new RobotDrive(leftTalonA, leftTalonB, rightTalonA,
                 rightTalonB);
     }
-    
+
     public void run()
     {
         double y;
         if(Math.abs(joy.getY()) >= Constants.Chassis.DEADZONE)
         {
-            y = joy.getY() * Constants.Chassis.MOVE_SCALE;
-        } else
-        {
-            y = 0.0;
-        }
-        double twist;
-        if(Math.abs(joy.getTwist()) >= Constants.Chassis.TWIST_DEADZONE)
-        {
-            twist = joy.getTwist() * Constants.Chassis.TWIST_SCALE;
-        } else
-        {
-            twist = 0.0;
-        }
-        autoRun(y, twist);
-    }
-
-    public void proRun()
-    {
-        double y;
-        if(Math.abs(joy.getY()) >= Constants.Chassis.DEADZONE)
-        {
-            y = joy.getY() * Constants.Chassis.MOVE_SCALE;
+            y = Math.pow(joy.getY(), 3);
         } else
         {
             y = 0.0;
         }
         double twist = 0.0;
 
-        if(Math.abs(joy.getTwist()) >= Constants.Chassis.TWIST_DEADZONE)
+        if(joy.getTwist() > Constants.Chassis.TWIST_DEADZONE)
         {
-            twist = joy.getTwist();
+            twist = -.9 * Math.pow(joy.getTwist(), 2);
 
-            DriverStation.reportError("Twist: " + twist, false);
-
-            twist = -(Math.abs(twist)/twist)*(Math.pow(Math.abs(twist)-0.2, 2.8*Math.abs(twist)+.8)+0.27);
-            if(Math.abs(twist) >= 0.88)
-                twist = (Math.abs(twist)/twist)*0.88;
-            DriverStation.reportError("Calc'd Twist: " + twist, false);
+//            DriverStation.reportError("Twist: " + twist, false);
+//
+//            twist = -(Math.abs(twist)/twist)*(Math.pow(Math.abs(twist)-0.2, 2.8*Math.abs(twist)+.8)+0.27);
+//            if(Math.abs(twist) >= 0.88)
+//                twist = (Math.abs(twist)/twist)*0.88;
+//            DriverStation.reportError("Calc'd Twist: " + twist, false);
+        } else if(joy.getTwist() < Constants.Chassis.TWIST_DEADZONE)
+        {
+            twist = .9 * Math.pow(joy.getTwist(), 2);
         } else
         {
             twist = 0.0;

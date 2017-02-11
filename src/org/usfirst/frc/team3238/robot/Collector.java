@@ -43,52 +43,41 @@ class Collector {
 
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
                 break;
             case "collecting ground": // Collectors spinning inward, lift lowered
                 manualControls(Constants.Collector.LOWER_POWER, Constants.Collector.INTAKE_POWER);
                 watchLimit("raising");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
                 watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
+                watchJoy(Constants.Collector.RAISE_LIFT_BUTTON, "raising");
                 break;
-            case "collecting feed": // Collectors spinning slowly inward, lift raised
-                manualControls(Constants.Collector.RAISE_POWER, Constants.Collector.FEED_INTAKE_POWER);
-                watchLimit("raising done");
-                watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
-                        "collecting ground");
-                watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
-                break;
-
             case "raising": // Raising lift
                 manualControls(Constants.Collector.RAISE_POWER, 0.0);
 
-                watchUpperLimit("raising done");
+                watchUpperLimit("inactive");
+//                watchUpperLimit("raising done");
                 watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
                 break;
-            case "raising done": // Raising gear
-                manualControls(Constants.Collector.RAISE_POWER, Constants.Collector.RAISE_INTAKE_POWER);
-                time(Constants.Collector.RAISE_SECONDS, "inactive");
-                watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
-                watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
-                        "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
-                break;
+//            case "raising done": // Raising gear
+//                manualControls(Constants.Collector.RAISE_POWER, Constants.Collector.RAISE_INTAKE_POWER);
+//                time(Constants.Collector.RAISE_SECONDS, "inactive");
+//                watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
+//                watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
+//                        "collecting ground");
+//                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
+//                        "collecting feed");
+//                break;
             case "manual":
                 manualControls(0.0, 0.0);
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
+                watchJoy(Constants.Collector.RAISE_LIFT_BUTTON, "raising");
                 break;
 
         }
+
+        DriverStation.reportWarning("Collector State: " + state, false);
     }
 
     private void manualControls(double liftPower, double intakePower) {
@@ -106,8 +95,7 @@ class Collector {
         if (joy.getPOV() == Constants.Collector.COLLECT_RAISE_POV) {
             state = "manual";
             lift.set(Constants.Collector.RAISE_POWER);
-        } else if (joy.getPOV()
-                == Constants.Collector.COLLECT_LOWER_POV) {
+        } else if (joy.getRawButton(Constants.Collector.COLLECT_LOWER_BUTTON) || joy.getPOV() == Constants.Collector.COLLECT_LOWER_POV) {
             state = "manual";
             lift.set(Constants.Collector.LOWER_POWER);
         } else {
