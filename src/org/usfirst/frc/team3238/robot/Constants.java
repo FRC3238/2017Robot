@@ -1,8 +1,15 @@
 package org.usfirst.frc.team3238.robot;
 
-
+/**
+ * Container for all constant values.
+ */
 public class Constants
 {
+    public class Robot
+    {
+        public static final int MAIN_JOYSTICK_PORT = 0;
+    }
+    
     public class Chassis
     {
         public static final int DRIVE_TALON_ID_RIGHT_A = 1;
@@ -12,13 +19,8 @@ public class Constants
         public static final double DEADZONE = 0.25;
         public static final double TWIST_DEADZONE = 0.3;
         
-        public static final double TWIST_SCALE = -0.6;
-        public static final double MOVE_SCALE = 0.6;
-    }
-    
-    public class Robot
-    {
-        public static final int MAIN_JOYSTICK_PORT = 0;
+        public static final double TWIST_SCALE = 0.9;
+        public static final double MOVE_SCALE = 1.0;
     }
     
     public class Climber
@@ -32,7 +34,7 @@ public class Constants
         public static final double CLIMBER_GO_UP_VALUE = -1.0;
         public static final double CLIMBER_GO_DOWN_VALUE = 1.0;
     }
-  
+    
     public class Collector
     {
         public static final int LEFT_TALON_ID = 6;
@@ -47,8 +49,6 @@ public class Constants
         public static final int COLLECT_GROUND_BUTTON = 2;
         public static final int RAISE_LIFT_BUTTON = 5;
         public static final int DISABLE_BUTTON = 3;
-
-        
         
         public static final double INTAKE_POWER = -0.4;     //-0.4
         public static final double FEED_INTAKE_POWER = -0.4;    // 0.4

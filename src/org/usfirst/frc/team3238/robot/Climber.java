@@ -4,26 +4,34 @@ import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 
 /**
- * Created by Jefferson on 1/16/2017.
+ * Controlling class for climber subsystem
+ *
+ * @author jefferson
  */
 class Climber
 {
     private CANTalon climbTalonOne, climbTalonTwo;
     private Joystick joy;
     
+    /**
+     * Sets up talon objects, initializes climber
+     *
+     * @param climbTalonOne climber talon
+     * @param climbTalonTwo climber talon
+     * @param joy           main driver joystick
+     */
     Climber(CANTalon climbTalonOne, CANTalon climbTalonTwo, Joystick joy)
     {
         this.joy = joy;
         this.climbTalonOne = climbTalonOne;
         this.climbTalonTwo = climbTalonTwo;
-        climbTalonOne.set(0.0);
-        climbTalonTwo.set(0.0);
     }
     
+    /**
+     * Runs climber motors based on joystick input
+     */
     void run()
     {
-        climbTalonOne.enableBrakeMode(true);
-        climbTalonTwo.enableBrakeMode(true);
         if(joy.getRawButton(Constants.Climber.CLIMBER_UP_BUTTON))
         {
             set(Constants.Climber.CLIMBER_GO_UP_VALUE);
@@ -36,16 +44,15 @@ class Climber
         }
     }
     
+    /**
+     * Runs both climber motors at specified speed
+     *
+     * @param power speed
+     */
     private void set(double power)
     {
         climbTalonOne.set(power);
         climbTalonTwo.set(power);
-    }
-    
-    void disabled()
-    {
-        climbTalonOne.enableBrakeMode(false);
-        climbTalonTwo.enableBrakeMode(false);
     }
 }
 

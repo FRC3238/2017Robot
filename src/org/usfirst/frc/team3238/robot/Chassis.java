@@ -1,19 +1,28 @@
 package org.usfirst.frc.team3238.robot;
 
 import com.ctre.CANTalon;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 
 /**
- * Created by BUTLEJEF000 on 1/16/2017.
+ * Controlling class for chassis subsystem
+ *
+ * @author jefferson, aaron
  */
 public class Chassis
 {
     private RobotDrive driveTrain;
-    
     private Joystick joy;
     
+    /**
+     * Sets up talons, initializes subsystem
+     *
+     * @param leftTalonA  left talon
+     * @param leftTalonB  left talon
+     * @param rightTalonA right talon
+     * @param rightTalonB right talon
+     * @param joy         main driver joystick
+     */
     Chassis(CANTalon leftTalonA, CANTalon leftTalonB, CANTalon rightTalonA,
             CANTalon rightTalonB, Joystick joy)
     {
@@ -22,38 +31,42 @@ public class Chassis
         driveTrain = new RobotDrive(leftTalonA, leftTalonB, rightTalonA,
                 rightTalonB);
     }
-
+    
+    /**
+     * Runs drive train with mapping of joystick inputs
+     */
     public void run()
     {
         double y;
         if(Math.abs(joy.getY()) >= Constants.Chassis.DEADZONE)
         {
-            y = Math.pow(joy.getY(), 3);
+            y = Constants.Chassis.MOVE_SCALE * Math.pow(joy.getY(), 3);
         } else
         {
             y = 0.0;
         }
-        double twist = 0.0;
-
+        
+        double twist;
         if(joy.getTwist() > Constants.Chassis.TWIST_DEADZONE)
         {
-            twist = -.9 * Math.pow(joy.getTwist(), 2);
-
-//            DriverStation.reportError("Twist: " + twist, false);
-//
-//            twist = -(Math.abs(twist)/twist)*(Math.pow(Math.abs(twist)-0.2, 2.8*Math.abs(twist)+.8)+0.27);
-//            if(Math.abs(twist) >= 0.88)
-//                twist = (Math.abs(twist)/twist)*0.88;
-//            DriverStation.reportError("Calc'd Twist: " + twist, false);
+            twist = -Constants.Chassis.TWIST_SCALE * Math
+                    .pow(joy.getTwist(), 2);
         } else if(joy.getTwist() < Constants.Chassis.TWIST_DEADZONE)
         {
-            twist = .9 * Math.pow(joy.getTwist(), 2);
+            twist = Constants.Chassis.TWIST_SCALE * Math.pow(joy.getTwist(), 2);
         } else
         {
             twist = 0.0;
         }
         autoRun(y, twist);
     }
+    
+    /**
+     * Sets chassis speed
+     *
+     * @param y     forward speed
+     * @param twist twist speed
+     */
     public void autoRun(double y, double twist)
     {
         driveTrain.arcadeDrive(y, twist);
