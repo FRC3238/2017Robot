@@ -4,12 +4,12 @@ import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Class to control Gear Collector
  *
  * @author aaron
- * @version 1.0
  */
 class Collector {
     private CANTalon leftIntake, rightIntake;
@@ -19,9 +19,15 @@ class Collector {
     private Timer timer;
     private String state;
 
+    private int currentCounter = 0;
+    private double currentMult = 1.0;
+
     Collector(CANTalon leftIntake, CANTalon rightIntake, CANTalon lift,
               Joystick joy) {
-        leftIntake.enableLimitSwitch(false, false);
+        leftIntake.enableLimitSwitch(false, true);
+        lift.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+        lift.configEncoderCodesPerRev(1044);
+        lift.enableZeroSensorPositionOnReverseLimit(true);
 
         this.leftIntake = leftIntake;
         this.rightIntake = rightIntake;
@@ -36,82 +42,98 @@ class Collector {
         state = "inactive";
     }
 
+    public void placeGear() {
+        state = "placing";
+    }
+
     void run() {
+
         switch (state) {
             case "inactive": // Not moving
                 manualControls(Constants.Collector.RAISE_POWER, 0.0);
 
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
+                watchJoy(Constants.Collector.PLACE_GEAR_BUTTON, "placing");
                 break;
             case "collecting ground": // Collectors spinning inward, lift lowered
-                manualControls(Constants.Collector.LOWER_POWER, Constants.Collector.INTAKE_POWER);
-                watchLimit("raising");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
+                manualControls(Constants.Collector.LOWER_POWER,
+                        Constants.Collector.INTAKE_POWER);
+                watchLimit();
                 watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
+                watchCurrent();
                 break;
-            case "collecting feed": // Collectors spinning slowly inward, lift raised
-                manualControls(Constants.Collector.RAISE_POWER, Constants.Collector.FEED_INTAKE_POWER);
-                watchLimit("raising done");
-                watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
-                        "collecting ground");
-                watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
-                break;
-
-            case "raising": // Raising lift
-                manualControls(Constants.Collector.RAISE_POWER, 0.0);
-
-                watchUpperLimit("raising done");
+            case "placing":
+                manualControls(Constants.Collector.PLACE_GEAR_POWER, 0.0);
                 watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
-                break;
-            case "raising done": // Raising gear
-                manualControls(Constants.Collector.RAISE_POWER, Constants.Collector.RAISE_INTAKE_POWER);
-                time(Constants.Collector.RAISE_SECONDS, "inactive");
-                watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
-                watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
-                        "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
+                watchEncoder();
                 break;
             case "manual":
                 manualControls(0.0, 0.0);
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
-                watchJoy(Constants.Collector.COLLECT_FEED_BUTTON,
-                        "collecting feed");
+                watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
+                watchJoy(Constants.Collector.PLACE_GEAR_BUTTON, "placing");
                 break;
+        }
 
+        SmartDashboard.putString("Collector state", state);
+        SmartDashboard.putNumber("Collector encoder", lift.getEncPosition());
+        if (currentCounter > SmartDashboard.getNumber("Current count", 0)) {
+            SmartDashboard.putNumber("Current count", currentCounter);
         }
     }
 
     private void manualControls(double liftPower, double intakePower) {
         if (joy.getPOV() == Constants.Collector.COLLECT_IN_POV) {
             state = "manual";
-            setIntake(-Constants.Collector.FEED_INTAKE_POWER);
+            setIntake(-Constants.Collector.INTAKE_POWER);
+            lift.set(0.0);
         } else if (joy
                 .getPOV() == Constants.Collector.COLLECT_OUT_POV) {
             state = "manual";
-            setIntake(Constants.Collector.FEED_INTAKE_POWER);
-        } else {
-            setIntake(intakePower);
-        }
-
-        if (joy.getPOV() == Constants.Collector.COLLECT_RAISE_POV) {
+            setIntake(Constants.Collector.INTAKE_POWER);
+            lift.set(0.0);
+        } else if (joy.getPOV() == Constants.Collector.COLLECT_RAISE_POV) {
             state = "manual";
             lift.set(Constants.Collector.RAISE_POWER);
+            setIntake(0.0);
         } else if (joy.getPOV()
                 == Constants.Collector.COLLECT_LOWER_POV) {
             state = "manual";
             lift.set(Constants.Collector.LOWER_POWER);
+            setIntake(0.0);
+        } else if (joy.getPOV()
+                == Constants.Collector.COLLECT_RAISE_IN_POV) {
+            state = "manual";
+            lift.set(Constants.Collector.RAISE_POWER);
+            setIntake(-Constants.Collector.INTAKE_POWER);
+        } else if (joy.getPOV()
+                == Constants.Collector.COLLECT_RAISE_OUT_POV) {
+            state = "manual";
+            lift.set(Constants.Collector.RAISE_POWER);
+            setIntake(Constants.Collector.INTAKE_POWER);
+        } else if (joy.getPOV()
+                == Constants.Collector.COLLECT_LOWER_IN_POV) {
+            state = "manual";
+            lift.set(Constants.Collector.LOWER_POWER);
+            setIntake(-Constants.Collector.INTAKE_POWER);
+        } else if (joy.getPOV()
+                == Constants.Collector.COLLECT_LOWER_OUT_POV) {
+            state = "manual";
+            lift.set(Constants.Collector.LOWER_POWER);
+            setIntake(Constants.Collector.INTAKE_POWER);
         } else {
             lift.set(liftPower);
+            setIntake(intakePower);
+        }
+    }
+
+    private void watchEncoder() {
+        if (lift.getEncPosition() < Constants.Collector.ENCODER_GEAR_BOTTOM_LIMIT) {
+            this.state = "inactive";
         }
     }
 
@@ -120,43 +142,30 @@ class Collector {
         rightIntake.set(-power);
     }
 
-    private void resetTime() {
-        timer.reset();
-        timer.start();
-    }
-
-    private void time(double seconds, String state) {
-        if (timer.get() >= seconds) {
-            resetTime();
-            this.state = state;
-        }
-    }
-
     private void watchJoy(int button, String state) {
         if (joy.getRawButton(button)) {
-            resetTime();
             this.state = state;
         }
     }
 
-    private void watchLimit(String state) {
+    private void watchLimit() {
         if (leftIntake.isRevLimitSwitchClosed()) {
-            resetTime();
-            this.state = state;
+            this.state = "inactive";
         }
     }
 
-    private void watchUpperLimit(String state) {
-        if (lift.isRevLimitSwitchClosed()) {
-            resetTime();
-            this.state = state;
+    private void watchCurrent() {
+        if (leftIntake.getOutputCurrent() > Constants.Collector.CURRENT_THRESHOLD || rightIntake.getOutputCurrent() > Constants.Collector.CURRENT_THRESHOLD) {
+            currentCounter++;
+        } else {
+            currentCounter = 0;
         }
-    }
-
-    private void watchPOV(int pov, String state) {
-        if (joy.getPOV() == pov) {
-            resetTime();
-            this.state = state;
+        if (currentCounter > Constants.Collector.CURRENT_CYCLES_THRESH) {
+            state = "inactive";
+            DriverStation.reportError("COLLECTOR INTAKE IS STUCK!!!!", false);
+        } else if (currentCounter > Constants.Collector.CURRENT_CYCLES_INCREASE) {
+            currentMult = 1.2;
+            DriverStation.reportWarning("COLLECTOR INTAKE MIGHT BE STUCK!!!", false);
         }
     }
 }

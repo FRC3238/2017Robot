@@ -11,9 +11,13 @@ public class Constants
         public static final int DRIVE_TALON_ID_LEFT_B = 4;
         public static final double DEADZONE = 0.25;
         public static final double TWIST_DEADZONE = 0.3;
+        public static final double TWIST_MAX_THRESHOLD = 0.75;
         
-        public static final double TWIST_SCALE = -0.5;
+        public static final double TWIST_SCALE = -0.45;
         public static final double MOVE_SCALE = 0.8;
+
+        public static final double PLACING_GEAR_SPEED = 1.0;
+        public static final double PLACING_GEAR_TIME = 0.1;
     }
     
     public class Robot
@@ -27,10 +31,8 @@ public class Constants
         public static final int CLIMB_TALON_TWO_ID = 9;
         
         public static final int CLIMBER_UP_BUTTON = 6;
-        public static final int CLIMBER_DOWN_BUTTON = 4;
         
         public static final double CLIMBER_GO_UP_VALUE = -1.0;
-        public static final double CLIMBER_GO_DOWN_VALUE = 1.0;
     }
   
     public class Collector
@@ -38,24 +40,27 @@ public class Constants
         public static final int LEFT_TALON_ID = 6;
         public static final int RIGHT_TALON_ID = 7;
         public static final int LIFT_TALON_ID = 5;
-        
+
         public static final int COLLECT_RAISE_POV = 180;
         public static final int COLLECT_LOWER_POV = 0;
         public static final int COLLECT_IN_POV = 270;
         public static final int COLLECT_OUT_POV = 90;
+        public static final int COLLECT_RAISE_IN_POV = 225;
+        public static final int COLLECT_RAISE_OUT_POV = 135;
+        public static final int COLLECT_LOWER_IN_POV = 315;
+        public static final int COLLECT_LOWER_OUT_POV = 45;
         public static final int COLLECT_GROUND_BUTTON = 2;
-        public static final int COLLECT_FEED_BUTTON = 1;
-        public static final int EJECT_GEAR_BUTTON = 5;
+        public static final int PLACE_GEAR_BUTTON = 1;
         public static final int DISABLE_BUTTON = 3;
-        
-        
-        public static final double INTAKE_POWER = -0.4;
-        public static final double FEED_INTAKE_POWER = -0.4;
-        public static final double RAISE_INTAKE_POWER = 0.3;
-        public static final double RAISE_POWER = -0.4;
-        public static final double LOWER_POWER = 0.4;
-        
-        public static final double RAISE_SECONDS = 0.5;
+
+        public static final double INTAKE_POWER = -0.5;
+        public static final double RAISE_POWER = 0.4;
+        public static final double LOWER_POWER = -0.4;
+        public static final double PLACE_GEAR_POWER = -0.6;
+        public static final int ENCODER_GEAR_BOTTOM_LIMIT = -600;
+        public static final int CURRENT_THRESHOLD = 10;
+        public static final int CURRENT_CYCLES_INCREASE = 10;
+        public static final int CURRENT_CYCLES_THRESH = 30;
     }
     
     public class Shooter
