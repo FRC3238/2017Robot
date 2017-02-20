@@ -13,10 +13,10 @@ public class Constants
         public static final double TWIST_DEADZONE = 0.3;
         public static final double TWIST_MAX_THRESHOLD = 0.75;
         
-        public static final double TWIST_SCALE = -0.45;
+        public static final double TWIST_SCALE = -0.3;
         public static final double MOVE_SCALE = 0.8;
 
-        public static final double PLACING_GEAR_SPEED = 1.0;
+        public static final double PLACING_GEAR_SPEED = 0.5;
         public static final double PLACING_GEAR_TIME = 0.1;
     }
     
@@ -31,8 +31,10 @@ public class Constants
         public static final int CLIMB_TALON_TWO_ID = 9;
         
         public static final int CLIMBER_UP_BUTTON = 6;
+        public static final int CLIMBER_SLOW_BUTTON = 4;
         
         public static final double CLIMBER_GO_UP_VALUE = -1.0;
+        public static final double CLIMBER_SLOW_VALUE = -0.9;
     }
   
     public class Collector
@@ -58,7 +60,7 @@ public class Constants
         public static final double LOWER_POWER = -0.4;
         public static final double PLACE_GEAR_POWER = -0.6;
         public static final int ENCODER_GEAR_BOTTOM_LIMIT = -600;
-        public static final int CURRENT_THRESHOLD = 10;
+        public static final int CURRENT_THRESHOLD = 12;
         public static final int CURRENT_CYCLES_INCREASE = 10;
         public static final int CURRENT_CYCLES_THRESH = 30;
     }
@@ -68,5 +70,10 @@ public class Constants
         public static final int SHOOT_PREP_BUTTON = 7;
         public static final int SHOOT_BUTTON = 8;
         public static final int DISABLE_BUTTON = 3;
+
+        public static final int SHOOTER_TALON_ID = 10;
+        public static final int AGITATOR_TALON_ID = 11;
+
+        public static final int CODES_PER_REV = 360;
     }
 }

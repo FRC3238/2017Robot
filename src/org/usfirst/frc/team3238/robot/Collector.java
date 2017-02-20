@@ -48,6 +48,7 @@ class Collector {
 
     void run() {
 
+        DriverStation.reportWarning(state, false);
         switch (state) {
             case "inactive": // Not moving
                 manualControls(Constants.Collector.RAISE_POWER, 0.0);
@@ -55,6 +56,7 @@ class Collector {
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
                 watchJoy(Constants.Collector.PLACE_GEAR_BUTTON, "placing");
+                DriverStation.reportWarning(state, false);
                 break;
             case "collecting ground": // Collectors spinning inward, lift lowered
                 manualControls(Constants.Collector.LOWER_POWER,

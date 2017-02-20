@@ -16,11 +16,16 @@ class Climber
         this.joy = joy;
         this.climbTalonOne = climbTalonOne;
         this.climbTalonTwo = climbTalonTwo;
+        this.climbTalonOne.enableBrakeMode(false);
+        this.climbTalonTwo.enableBrakeMode(false);
     }
     
     void run()
     {
-        if(joy.getRawButton(Constants.Climber.CLIMBER_UP_BUTTON))
+        if(joy.getRawButton(Constants.Climber.CLIMBER_SLOW_BUTTON))
+        {
+            set(Constants.Climber.CLIMBER_SLOW_VALUE);
+        } else if(joy.getRawButton(Constants.Climber.CLIMBER_UP_BUTTON))
         {
             set(Constants.Climber.CLIMBER_GO_UP_VALUE);
         } else

@@ -7,11 +7,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team3238.robot.Autonomous.MotionProfileExample;
 import org.usfirst.frc.team3238.robot.Autonomous.Profiles;
 
+import java.util.ArrayList;
+
 public class Robot extends IterativeRobot implements PIDOutput
 {
     private Chassis chassis;
     private Collector collector;
     private Climber climber;
+    private Shooter shooter;
     private AHRS navX;
     private CANTalon leftLeader, rightLeader;
     double[][] boilerStraightFirst, boilerStraightSecond, centerLift, retrievalStraightFirst,
@@ -25,6 +28,7 @@ public class Robot extends IterativeRobot implements PIDOutput
     int valid_counter = 0;
     Timer t = new Timer();
     boolean e = false;
+    int auto_selection = 0;
     MotionProfileExample leftController, rightController;
     public static final double kP = 0.05,
                                 kI = 0.0,
@@ -32,7 +36,7 @@ public class Robot extends IterativeRobot implements PIDOutput
             kF = 0.0;
     int leftCount = 0, rightCount = 0, counterA = 0, controlStatus = 0,
             controlCalls = 0;
-    public static final double fTalon = 0.415, pTalon = 1.5, kToleranceDegrees = 2.0;
+    public static final double fTalon = 0.415, pTalon = 3.0, kToleranceDegrees = 2.0;
     double rotateToAngleRate = 0.0;
     private int codesPerRev = 360;
     @Override public void robotInit()
@@ -48,6 +52,8 @@ public class Robot extends IterativeRobot implements PIDOutput
         CANTalon liftCollect = new CANTalon(Constants.Collector.LIFT_TALON_ID);
         CANTalon climbTalonOne = new CANTalon(Constants.Climber.CLIMB_TALON_ONE_ID);
         CANTalon climbTalonTwo = new CANTalon(Constants.Climber.CLIMB_TALON_TWO_ID);
+        CANTalon agitatorTalon = new CANTalon(Constants.Shooter.AGITATOR_TALON_ID);
+        CANTalon shooterTalon = new CANTalon(Constants.Shooter.SHOOTER_TALON_ID);
         Joystick joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
         
         climber = new Climber(climbTalonOne, climbTalonTwo, joystick);
@@ -75,30 +81,134 @@ public class Robot extends IterativeRobot implements PIDOutput
         setEncoderInversions();
         leftController = new MotionProfileExample(leftLeader);
         rightController = new MotionProfileExample(rightLeader);
+        shooter = new Shooter(agitatorTalon, shooterTalon, joystick);
         setEncoderInversions();
         resetEncoderPosition();
+        CameraServer.getInstance().startAutomaticCapture();
 
     }
     
     @Override public void disabledPeriodic()
     {
         resetEncoderPosition();
-        DriverStation.reportError("Nav : " + navX.getAngle(), false);
+//        DriverStation.reportError("Nav : " + navX.getAngle(), false);
+        auto_selection = Preferences.getInstance().getInt("auto", 2 );
+        SmartDashboard.putNumber("Auto Found", auto_selection);
     }
-    
+    int boilerChoice = 0;
     @Override public void autonomousInit()
     {
-        resetDiagnostics();
-        setSideSpeedProfile();
-
+//        auto_selection = Preferences.getInstance().getInt("auto", 3 );
+        DriverStation.reportError("selected: " + auto_selection, false);
+        boilerChoice = 0;
+        switch(auto_selection) {
+            default:
+                break;
+            case 1: //Only Retrieval Side Peg
+                setSideSpeedProfileRet();
+                break;
+            case 2: //Only Center Peg
+                setCenterProfile();
+                break;
+            case 3: //Only Boiler Peg
+                setSideSpeedProfile();
+                break;
+            case 4: //Center Peg and Boiler Shoot
+                setCenterProfile();
+                boilerChoice = 1;
+                break;
+            case 5: //Boiler Peg and Boiler Shoot
+                setSideSpeedProfile();
+                boilerChoice = 2;
+                break;
+            case 6: //WIP only approach
+                setNZMoveProfile();
+                break;
+            case 7:
+                setNZEndProfile();
+                break;
+        }
+//        setSideSpeedProfileRet();
         prepEncodersForProfile();
+        navX.zeroYaw();
+        doneO = false;
+        e = false;
+        c = false;
+    d=false;
+    }
+    boolean doneO = false, d = false, c = false, b = false;
+    String status = "main";
+    ArrayList<String> flow= new ArrayList<String>();
+    public void iterativeAutoCaller() {
+        switch(status) {
+            case "First":
+                if(waitForProfile()) status = flow.remove(0);
+                break;
+            case "Second":
+            case "Disabled":
+                setMotorsDriveMode();
+                break;
+        }
+    }
+    public boolean waitForProfile() {
+        if(startMotionProfilesLoop())
+            status = flow.remove(0);
+        return startMotionProfilesLoop();
+    }
+    public void doNZ() {
+        if(!b) {
+            if (!c && startMotionProfilesLoop()) {
+                prepEncodersForProfile();
+                prepProfile(Profiles.leftNZ.Points, Profiles.rightNZ.Points, false);
+                c = true;
+            }
+            if (c && startMotionProfilesLoop()) {
+                prepEncodersForProfile();
+                prepProfile(Profiles.finishNZL.Points, Profiles.finishNZR.Points, false);
+//                setNZEndProfile();
+                d = true;
+            }
+            if (d && startMotionProfilesLoop()) {
+                b = true;
+            }
+        }
+        else
+            setMotorsDriveMode();
 
     }
-    
     @Override public void autonomousPeriodic()
     {
-        startMotionProfilesLoop();
-        DriverStation.reportError("NavX: " + navX.getAngle(), false);
+        doNZ();
+//        SmartDashboard.putNumber("NavX: ", navX.getAngle());
+//        SmartDashboard.putNumber("Left ENC: ", leftLeader.getEncPosition());
+//        SmartDashboard.putNumber("Right ENC: ", rightLeader.getEncPosition());
+//
+//        if(
+//        startMotionProfilesLoop()&&!doneO) {
+//            collector.placeGear();
+////            chassis.placeGear();
+//            if(boilerChoice == 0) {
+//                setMotorsDriveMode();
+//                chassis.placeGear();
+//            } else if (boilerChoice == 1) {
+//                setCenterBoilerShotProfile();
+//                prepEncodersForProfile();
+//            } else if(boilerChoice == 2) {
+//                setSideBoilerShotProfile();
+//                prepEncodersForProfile();
+//            }
+//            doneO = true;
+//            DriverStation.reportError("Gear Placing", false);
+//        };
+//        if(doneO) {
+//            DriverStation.reportError("in gear loop", false);
+//            if(boilerChoice!= 0)
+//            startMotionProfilesLoop();
+//            collector.run();
+//            if(boilerChoice == 0)
+//            chassis.autoRun(0,0);
+//        }
+//        DriverStation.reportError("NavX: " + navX.getAngle(), false);
     }
     
     @Override public void teleopInit()
@@ -109,9 +219,10 @@ public class Robot extends IterativeRobot implements PIDOutput
     
     @Override public void teleopPeriodic()
     {
-        chassis.run();
+        chassis.proRun();
         collector.run();
         climber.run();
+        shooter.run();
         DriverStation.reportError("Left Enc Position: " + leftLeader.getEncPosition()
         + "\nRight Enc Position: " + rightLeader.getEncPosition(), false);
     }
@@ -139,9 +250,12 @@ public class Robot extends IterativeRobot implements PIDOutput
 //     chassis.proRun();
 //     collector.run();
 //     climber.run();
-        collector.run();
-        boilerGear();
-        DriverStation.reportError("", false);
+        DriverStation.reportError("Left Enc: " + leftLeader.getEncPosition(), false);
+        DriverStation.reportError("Right Enc: " + rightLeader.getEncPosition(), false);
+
+//        collector.run();
+//        boilerGear();
+//        DriverStation.reportError("", false);
     }
     public void boilerGear() {
         DriverStation.reportWarning("Angle: " + navX.getAngle(), false);
@@ -262,6 +376,10 @@ public class Robot extends IterativeRobot implements PIDOutput
         controlCalls = 0;
         e = false;
     }
+    public void prepEncodersForProfileSoft() {
+        resetEncoderPosition();
+        resetDiagnostics();
+    }
     public void prepEncodersForProfile()
     {
         resetEncoderPosition();
@@ -348,6 +466,43 @@ public class Robot extends IterativeRobot implements PIDOutput
     public void setSideSpeedProfile() {
         leftController.setFedProfile(Profiles.rightBoiler.Points);
         rightController.setFedProfile(Profiles.leftBoiler.Points);
+    }
+    public void setSideSpeedProfileRet() {
+        leftController.setFedProfile(Profiles.leftBoiler.Points);
+        rightController.setFedProfile(Profiles.rightBoiler.Points);
+
+    }
+    public void setCenterProfile() {
+        leftController.setFedProfile(Profiles.centerLift.Points);
+
+        rightController.setFedProfile(Profiles.centerLift.Points);
+    }
+    public void setSideBoilerShotProfile() {
+        leftController.setFedProfile(Profiles.leftSideBoilerShot.Points);
+        rightController.setFedProfile(Profiles.rightSideBoilerShot.Points);
+    }
+    public void setCenterBoilerShotProfile() {
+        leftController.setFedProfile(Profiles.leftSideBoilerShot.Points);
+        rightController.setFedProfile(Profiles.rightSideBoilerShot.Points);
+    }
+    public void setNZMoveProfile() {
+        leftController.setFedProfile(Profiles.leftNZ.Points);
+        rightController.setFedProfile(Profiles.rightNZ.Points);
+    }
+    public void setNZEndProfile() {
+        leftController.setFedProfile(Profiles.finishNZL.Points);
+
+        rightController.setFedProfile(Profiles.finishNZR.Points);
+    }
+    public void prepProfile(double[][] leftProfile, double[][] rightProfile, boolean inverted) {
+        if(inverted) {
+            leftController.setFedProfile(leftProfile);
+            rightController.setFedProfile(rightProfile);
+        } else {
+
+            leftController.setFedProfile(rightProfile);
+            rightController.setFedProfile(leftProfile);
+        }
     }
 }
 

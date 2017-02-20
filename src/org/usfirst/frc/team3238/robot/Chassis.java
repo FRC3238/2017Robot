@@ -62,6 +62,12 @@ public class Chassis {
 
     public void proRun() {
         double y;
+        if (joy.getRawButton(Constants.Collector.PLACE_GEAR_BUTTON) && !placingInit) {
+            placeGear();
+            placingInit = true;
+        } else {
+            placingInit = false;
+        }
         if (Math.abs(joy.getY()) >= Constants.Chassis.DEADZONE) {
             y = joy.getY() * Constants.Chassis.MOVE_SCALE;
         } else {
@@ -70,7 +76,8 @@ public class Chassis {
         double twist;
 
         if (Math.abs(joy.getTwist()) >= Constants.Chassis.TWIST_DEADZONE) {
-            twist = Math.pow(joy.getTwist(), 3);
+            twist = joy.getTwist();
+            twist = -(Math.pow(Math.abs(joy.getTwist()), 3.8))*(Math.abs(twist)/twist);
         } else {
             twist = 0.0;
         }
