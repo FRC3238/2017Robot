@@ -165,6 +165,7 @@ public class Robot extends IterativeRobot implements PIDOutput
     @Override public void testInit()
     {
         auto.PhaseCollection.clear();
+        SubPhaser.calledCollect = false;
         switch(auto_selection) {
             case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
                 auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, true, Phase.NONE));
