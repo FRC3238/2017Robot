@@ -21,12 +21,6 @@ public class Robot extends IterativeRobot implements PIDOutput
     retrievalStraightSecond;
     private CANTalon.MotionProfileStatus _status = new CANTalon.MotionProfileStatus();
     PIDController turnController;
-    double iFix = kP;
-    boolean adjusted = false;
-    boolean firstStage = false, secondStage = false;;
-    boolean rotateToAngle = false;
-    int valid_counter = 0;
-    Timer t = new Timer();
     boolean e = false;
     int auto_selection = 0;
     Phaser auto;
@@ -35,7 +29,7 @@ public class Robot extends IterativeRobot implements PIDOutput
                                 kI = 0.0,
     kD = 0.02,
             kF = 0.0;
-    int leftCount = 0, rightCount = 0, counterA = 0, controlStatus = 0,
+    int  controlStatus = 0,
             controlCalls = 0;
     public static final double fTalon = 0.415, pTalon = 3.0, kToleranceDegrees = 2.0;
     double rotateToAngleRate = 0.0;
@@ -145,80 +139,9 @@ public class Robot extends IterativeRobot implements PIDOutput
     String status = "0";
     int count = 0;
     ArrayList<String> flow= new ArrayList<String>();
-    public void iterativeAutoCaller() {
-        status = "" + count;
-        switch(status) {
-            case "0":
-                waitForProfile();
-                break;
-            case "Second":
-            case "Disabled":
-                setMotorsDriveMode();
-                break;
-        }
-    }
-    public boolean waitForProfile() {
-        if(motionProfileLoop()) {
-            prepEncodersForProfile();
-            status = flow.remove(0);
-        }
-        return motionProfileLoop();
-    }
-    public void doNZ() {
-        if(!b) {
-            if (!c && motionProfileLoop()) {
-                prepEncodersForProfile();
-                prepProfile(Profiles.leftNZ.Points, Profiles.rightNZ.Points, false);
-                c = true;
-            }
-            if (c && motionProfileLoop()) {
-                prepEncodersForProfile();
-                prepProfile(Profiles.finishNZL.Points, Profiles.finishNZR.Points, false);
-//                setNZEndProfile();
-                d = true;
-            }
-            if (d && motionProfileLoop()) {
-                b = true;
-            }
-        }
-        else
-            setMotorsDriveMode();
 
-    }
     @Override public void autonomousPeriodic()
     {
-//        iterativeAutoCaller();
-//        doNZ();
-        SmartDashboard.putNumber("NavX: ", navX.getAngle());
-        SmartDashboard.putNumber("Left ENC: ", leftLeader.getEncPosition());
-        SmartDashboard.putNumber("Right ENC: ", rightLeader.getEncPosition());
-
-        if(
-        motionProfileLoop()&&!doneO) {
-            collector.placeGear();
-//            chassis.placeGear();
-            if(boilerChoice == 0) {
-                setMotorsDriveMode();
-                chassis.placeGear();
-            } else if (boilerChoice == 1) {
-                setCenterBoilerShotProfile();
-                prepEncodersForProfile();
-            } else if(boilerChoice == 2) {
-                setSideBoilerShotProfile();
-                prepEncodersForProfile();
-            }
-            doneO = true;
-            DriverStation.reportError("Gear Placing", false);
-        };
-        if(doneO) {
-            DriverStation.reportError("in gear loop", false);
-            if(boilerChoice!= 0)
-            motionProfileLoop();
-            collector.run();
-            if(boilerChoice == 0)
-            chassis.autoRun(0,0);
-        }
-        DriverStation.reportError("NavX: " + navX.getAngle(), false);
     }
     
     @Override public void teleopInit()
@@ -295,45 +218,7 @@ public class Robot extends IterativeRobot implements PIDOutput
         notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT;
 
     }//the greatest line ever
-    public void boilerGear() {
-        DriverStation.reportWarning("Angle: " + navX.getAngle(), false);
-        if(!firstStage && motionProfileLoop()) {
 
-//            DriverStation.reportError("First Forward", false);
-            firstStage = true;
-            setMotorsDriveMode();
-            t.reset();
-            t.start();
-        }
-        if(firstStage && !secondStage) {
-//
-
-//            DriverStation.reportError("Angle Turn", false);
-            if(turnToDesiredAngle() > 10) {
-                setLayeredProfile(2);
-                secondStage = true;
-                resetDiagnostics();
-                prepEncodersForProfile();
-                setLayeredProfile(2);
-            }
-        }
-        if(secondStage && !gear) {
-
-//            DriverStation.reportError("Second Forward", false);
-            if(motionProfileLoop()) {
-                gear = true;
-
-                collector.placeGear();
-                chassis.placeGear();
-            }
-
-        }
-        if(gear) {
-            setMotorsDriveMode();
-            collector.run();
-            chassis.autoRun(0,0);
-        }
-    }
 
     @Override
     public void pidWrite(double output) {
@@ -420,10 +305,6 @@ public class Robot extends IterativeRobot implements PIDOutput
         controlCalls = 0;
         e = false;
     }
-    public void prepEncodersForProfileSoft() {
-        resetEncoderPosition();
-        resetDiagnostics();
-    }
     public void prepEncodersForProfile()
     {
         resetEncoderPosition();
@@ -484,19 +365,7 @@ public class Robot extends IterativeRobot implements PIDOutput
         leftLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
         rightLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
     }
-    public int turnToDesiredAngle() {
-//        boolean done = false;
-        double currentRotationRate = 0;
-        if(!turnController.isEnabled()) {
-            turnController.setSetpoint(-60.0f);
-            turnController.enable();
-        }
-        if(turnController.onTarget()) valid_counter++;
-        currentRotationRate = rotateToAngleRate;
-        chassis.autoRun(0, -currentRotationRate);
-        DriverStation.reportWarning(""+navX.getAngle(),false);
-        return valid_counter;
-    }
+
     public void setCenterLiftProfile() {
         leftController.setFedProfile(centerLift);
         rightController.setFedProfile(centerLift);
@@ -538,16 +407,7 @@ public class Robot extends IterativeRobot implements PIDOutput
 
         rightController.setFedProfile(Profiles.finishNZR.Points);
     }
-    public void prepProfile(double[][] leftProfile, double[][] rightProfile, boolean inverted) {
-        if(inverted) {
-            leftController.setFedProfile(leftProfile);
-            rightController.setFedProfile(rightProfile);
-        } else {
 
-            leftController.setFedProfile(rightProfile);
-            rightController.setFedProfile(leftProfile);
-        }
-    }
     public void initMotionProfile() {
         setNewMotionProfile();
     }
@@ -561,12 +421,6 @@ public class Robot extends IterativeRobot implements PIDOutput
         } else {
             notShooting = false;
         }
-//        } catch(Exception e) {
-//            setMotorsDriveMode();
-//            notShooting = false;
-//            leftLeader.set(0);
-//            rightLeader.set(0);
-//        }
     }
 }
 
