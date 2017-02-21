@@ -58,7 +58,7 @@ public class Constants
         public static final double INTAKE_POWER = -0.5;
         public static final double RAISE_POWER = 0.4;
         public static final double LOWER_POWER = -0.4;
-        public static final double PLACE_GEAR_POWER = -0.6;
+        public static final double PLACE_GEAR_POWER = -0.7;
         public static final int ENCODER_GEAR_BOTTOM_LIMIT = -600;
         public static final int CURRENT_THRESHOLD = 12;
         public static final int CURRENT_CYCLES_INCREASE = 10;
@@ -67,6 +67,7 @@ public class Constants
     
     public class Shooter
     {
+        public static final int SHOOT_RPM = 3000;
         public static final int SHOOT_PREP_BUTTON = 7;
         public static final int SHOOT_BUTTON = 8;
         public static final int DISABLE_BUTTON = 3;
@@ -75,5 +76,9 @@ public class Constants
         public static final int AGITATOR_TALON_ID = 11;
 
         public static final int CODES_PER_REV = 360;
+        public static final double AGITATOR_SPEED = 0.55;
+    }
+    public class Autonomous {
+        public static final int DISABLE = 0, BOILERSIDESHOOT = 1, BOILERSIDE = 2, CENTER = 3, CENTERSHOOT = 4, RETRIEVALSIDE = 5, RETRIEVALNEUTRALZONE = 6;
     }
 }

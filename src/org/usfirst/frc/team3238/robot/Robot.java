@@ -4,8 +4,7 @@ import com.ctre.CANTalon;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.usfirst.frc.team3238.robot.Autonomous.MotionProfileExample;
-import org.usfirst.frc.team3238.robot.Autonomous.Profiles;
+import org.usfirst.frc.team3238.robot.Autonomous.*;
 
 import java.util.ArrayList;
 
@@ -17,6 +16,7 @@ public class Robot extends IterativeRobot implements PIDOutput
     private Shooter shooter;
     private AHRS navX;
     private CANTalon leftLeader, rightLeader;
+    SubsystemPhaser SubPhaser;
     double[][] boilerStraightFirst, boilerStraightSecond, centerLift, retrievalStraightFirst,
     retrievalStraightSecond;
     private CANTalon.MotionProfileStatus _status = new CANTalon.MotionProfileStatus();
@@ -29,6 +29,7 @@ public class Robot extends IterativeRobot implements PIDOutput
     Timer t = new Timer();
     boolean e = false;
     int auto_selection = 0;
+    Phaser auto;
     MotionProfileExample leftController, rightController;
     public static final double kP = 0.05,
                                 kI = 0.0,
@@ -39,8 +40,10 @@ public class Robot extends IterativeRobot implements PIDOutput
     public static final double fTalon = 0.415, pTalon = 3.0, kToleranceDegrees = 2.0;
     double rotateToAngleRate = 0.0;
     private int codesPerRev = 360;
+    boolean notShooting = true;
     @Override public void robotInit()
     {
+        auto = new Phaser();
         leftLeader = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_A);
         CANTalon leftFollower = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_B);
         rightLeader = new CANTalon(
@@ -85,7 +88,7 @@ public class Robot extends IterativeRobot implements PIDOutput
         setEncoderInversions();
         resetEncoderPosition();
         CameraServer.getInstance().startAutomaticCapture();
-
+        SubPhaser = new SubsystemPhaser(collector, shooter);
     }
     
     @Override public void disabledPeriodic()
@@ -94,6 +97,7 @@ public class Robot extends IterativeRobot implements PIDOutput
 //        DriverStation.reportError("Nav : " + navX.getAngle(), false);
         auto_selection = Preferences.getInstance().getInt("auto", 2 );
         SmartDashboard.putNumber("Auto Found", auto_selection);
+        notShooting = true;
     }
     int boilerChoice = 0;
     @Override public void autonomousInit()
@@ -135,14 +139,17 @@ public class Robot extends IterativeRobot implements PIDOutput
         e = false;
         c = false;
     d=false;
+    count = 0;
     }
     boolean doneO = false, d = false, c = false, b = false;
-    String status = "main";
+    String status = "0";
+    int count = 0;
     ArrayList<String> flow= new ArrayList<String>();
     public void iterativeAutoCaller() {
+        status = "" + count;
         switch(status) {
-            case "First":
-                if(waitForProfile()) status = flow.remove(0);
+            case "0":
+                waitForProfile();
                 break;
             case "Second":
             case "Disabled":
@@ -151,24 +158,26 @@ public class Robot extends IterativeRobot implements PIDOutput
         }
     }
     public boolean waitForProfile() {
-        if(startMotionProfilesLoop())
+        if(motionProfileLoop()) {
+            prepEncodersForProfile();
             status = flow.remove(0);
-        return startMotionProfilesLoop();
+        }
+        return motionProfileLoop();
     }
     public void doNZ() {
         if(!b) {
-            if (!c && startMotionProfilesLoop()) {
+            if (!c && motionProfileLoop()) {
                 prepEncodersForProfile();
                 prepProfile(Profiles.leftNZ.Points, Profiles.rightNZ.Points, false);
                 c = true;
             }
-            if (c && startMotionProfilesLoop()) {
+            if (c && motionProfileLoop()) {
                 prepEncodersForProfile();
                 prepProfile(Profiles.finishNZL.Points, Profiles.finishNZR.Points, false);
 //                setNZEndProfile();
                 d = true;
             }
-            if (d && startMotionProfilesLoop()) {
+            if (d && motionProfileLoop()) {
                 b = true;
             }
         }
@@ -178,37 +187,38 @@ public class Robot extends IterativeRobot implements PIDOutput
     }
     @Override public void autonomousPeriodic()
     {
-        doNZ();
-//        SmartDashboard.putNumber("NavX: ", navX.getAngle());
-//        SmartDashboard.putNumber("Left ENC: ", leftLeader.getEncPosition());
-//        SmartDashboard.putNumber("Right ENC: ", rightLeader.getEncPosition());
-//
-//        if(
-//        startMotionProfilesLoop()&&!doneO) {
-//            collector.placeGear();
-////            chassis.placeGear();
-//            if(boilerChoice == 0) {
-//                setMotorsDriveMode();
-//                chassis.placeGear();
-//            } else if (boilerChoice == 1) {
-//                setCenterBoilerShotProfile();
-//                prepEncodersForProfile();
-//            } else if(boilerChoice == 2) {
-//                setSideBoilerShotProfile();
-//                prepEncodersForProfile();
-//            }
-//            doneO = true;
-//            DriverStation.reportError("Gear Placing", false);
-//        };
-//        if(doneO) {
-//            DriverStation.reportError("in gear loop", false);
-//            if(boilerChoice!= 0)
-//            startMotionProfilesLoop();
-//            collector.run();
-//            if(boilerChoice == 0)
-//            chassis.autoRun(0,0);
-//        }
-//        DriverStation.reportError("NavX: " + navX.getAngle(), false);
+//        iterativeAutoCaller();
+//        doNZ();
+        SmartDashboard.putNumber("NavX: ", navX.getAngle());
+        SmartDashboard.putNumber("Left ENC: ", leftLeader.getEncPosition());
+        SmartDashboard.putNumber("Right ENC: ", rightLeader.getEncPosition());
+
+        if(
+        motionProfileLoop()&&!doneO) {
+            collector.placeGear();
+//            chassis.placeGear();
+            if(boilerChoice == 0) {
+                setMotorsDriveMode();
+                chassis.placeGear();
+            } else if (boilerChoice == 1) {
+                setCenterBoilerShotProfile();
+                prepEncodersForProfile();
+            } else if(boilerChoice == 2) {
+                setSideBoilerShotProfile();
+                prepEncodersForProfile();
+            }
+            doneO = true;
+            DriverStation.reportError("Gear Placing", false);
+        };
+        if(doneO) {
+            DriverStation.reportError("in gear loop", false);
+            if(boilerChoice!= 0)
+            motionProfileLoop();
+            collector.run();
+            if(boilerChoice == 0)
+            chassis.autoRun(0,0);
+        }
+        DriverStation.reportError("NavX: " + navX.getAngle(), false);
     }
     
     @Override public void teleopInit()
@@ -227,39 +237,67 @@ public class Robot extends IterativeRobot implements PIDOutput
         + "\nRight Enc Position: " + rightLeader.getEncPosition(), false);
     }
 
-    
+
+    boolean gear = false;
     @Override public void testInit()
     {
-        resetDiagnostics();
+        auto.PhaseCollection.clear();
+        switch(auto_selection) {
+            case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
+                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(Profiles.leftSideBoilerShot.Points, Profiles.rightSideBoilerShot.Points, false, Phase.REVSHOOTGEAR));
+                auto.addPhase(new Phase(Profiles.leftSideBoilerShot.Points, Profiles.rightSideBoilerShot.Points, false, Phase.SHOOT));
+                break;
+            case Constants.Autonomous.BOILERSIDE:
+                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, true, Phase.NONE));
 
-        setLayeredProfile(1);
-        prepEncodersForProfile();
-        valid_counter = 0;
-        firstStage = false;
-        secondStage = false;
-        t.reset();
-        iFix = 0.01;
-        turnController.setPID(kP, kI, kD, kF);
-        adjusted = false;
-        navX.zeroYaw();
-        gear = false;
+                auto.addPhase(new Phase(Profiles.leftBack.Points, Profiles.rightBack.Points, true, Phase.PLACEGEAR));
+
+                break;
+
+            case Constants.Autonomous.CENTER:
+                auto.addPhase(new Phase(Profiles.centerLift.Points, Profiles.centerLift.Points, true, Phase.NONE));
+
+                auto.addPhase(new Phase(Profiles.leftBack.Points, Profiles.rightBack.Points, true, Phase.PLACEGEAR));
+                break;
+
+            case Constants.Autonomous.CENTERSHOOT:
+                auto.addPhase(new Phase(Profiles.centerLift.Points, Profiles.centerLift.Points, true, Phase.NONE));
+
+                auto.addPhase(new Phase(Profiles.leftCenterBoilerShot.Points, Profiles.rightCenterBoilerShot.Points, true, Phase.REVSHOOTGEAR));
+                auto.addPhase(new Phase(Profiles.leftCenterBoilerShot.Points, Profiles.rightCenterBoilerShot.Points, false, Phase.SHOOT));
+
+
+
+                break;
+
+            case Constants.Autonomous.RETRIEVALSIDE:
+                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(Profiles.leftBack.Points, Profiles.rightBack.Points, true, Phase.PLACEGEAR));
+
+                break;
+
+            case Constants.Autonomous.RETRIEVALNEUTRALZONE:
+                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, false, Phase.NONE));
+
+                auto.addPhase(new Phase(Profiles.leftNZ.Points, Profiles.rightNZ.Points, false, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(Profiles.finishNZL.Points, Profiles.finishNZR.Points, false, Phase.NONE));
+
+                break;
+        }
+
+        initMotionProfile();
     }
-    boolean gear = false;
     @Override public void testPeriodic()
     {
-//     chassis.proRun();
-//     collector.run();
-//     climber.run();
-        DriverStation.reportError("Left Enc: " + leftLeader.getEncPosition(), false);
-        DriverStation.reportError("Right Enc: " + rightLeader.getEncPosition(), false);
+        if(auto.run(motionProfileLoop())) setNewMotionProfile();
+        SubPhaser.run(auto.getCurrentPhase());
+        notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT;
 
-//        collector.run();
-//        boilerGear();
-//        DriverStation.reportError("", false);
-    }
+    }//the greatest line ever
     public void boilerGear() {
         DriverStation.reportWarning("Angle: " + navX.getAngle(), false);
-        if(!firstStage && startMotionProfilesLoop()) {
+        if(!firstStage && motionProfileLoop()) {
 
 //            DriverStation.reportError("First Forward", false);
             firstStage = true;
@@ -282,7 +320,7 @@ public class Robot extends IterativeRobot implements PIDOutput
         if(secondStage && !gear) {
 
 //            DriverStation.reportError("Second Forward", false);
-            if(startMotionProfilesLoop()) {
+            if(motionProfileLoop()) {
                 gear = true;
 
                 collector.placeGear();
@@ -315,12 +353,12 @@ public class Robot extends IterativeRobot implements PIDOutput
         leftLeader.getMotionProfileStatus(_status);
         rightLeader.getMotionProfileStatus(_status);
     }
-    public boolean startMotionProfilesLoop()
+    public boolean motionProfileLoop()
     {
         pollProfileStatus();
         DriverStation.reportWarning(
                 "auto periodic: MP status = " + _status.toString(), false);
-
+        if(notShooting)
         switch(controlStatus)
         {
             case 0:
@@ -369,6 +407,12 @@ public class Robot extends IterativeRobot implements PIDOutput
 
                 return e;
         }
+        else {
+            leftLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+            rightLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+
+        }
+        return false;
     }
     public void resetDiagnostics()
     {
@@ -503,6 +547,26 @@ public class Robot extends IterativeRobot implements PIDOutput
             leftController.setFedProfile(rightProfile);
             rightController.setFedProfile(leftProfile);
         }
+    }
+    public void initMotionProfile() {
+        setNewMotionProfile();
+    }
+    public void setNewMotionProfile() {
+        e = false;
+        prepEncodersForProfile();
+//        try {
+        if(auto.PhaseCollection.size() > 0) {
+            leftController.setFedProfile(auto.getCurrentProfileLeft());
+            rightController.setFedProfile(auto.getCurrentProfileRight());
+        } else {
+            notShooting = false;
+        }
+//        } catch(Exception e) {
+//            setMotorsDriveMode();
+//            notShooting = false;
+//            leftLeader.set(0);
+//            rightLeader.set(0);
+//        }
     }
 }
 

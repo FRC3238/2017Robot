@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  * @author aaron
  */
-class Collector {
+public class Collector {
     private CANTalon leftIntake, rightIntake;
     private CANTalon lift;
     private Joystick joy;
@@ -46,7 +46,7 @@ class Collector {
         state = "placing";
     }
 
-    void run() {
+    public void run() {
 
         DriverStation.reportWarning(state, false);
         switch (state) {
@@ -157,6 +157,8 @@ class Collector {
     }
 
     private void watchCurrent() {
+        SmartDashboard.putNumber("Your Current: ", leftIntake.getOutputCurrent());
+        SmartDashboard.putNumber("Right current: ", rightIntake.getOutputCurrent());
         if (leftIntake.getOutputCurrent() > Constants.Collector.CURRENT_THRESHOLD || rightIntake.getOutputCurrent() > Constants.Collector.CURRENT_THRESHOLD) {
             currentCounter++;
         } else {

@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Created by Team 3238 on 2/18/2017.
  */
-class Shooter {
+public class Shooter {
     private CANTalon agitator, shooter;
     private Joystick joy;
 
@@ -25,7 +25,17 @@ class Shooter {
         this.agitator.setInverted(true);
 
     }
-
+    public void autoPrep(int rpm) {
+        shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+        shooter.set(rpm);
+    }
+    public void autoShoot() {
+        agitator.set(Constants.Shooter.AGITATOR_SPEED);
+    }
+    public void stopShootAuto() {
+        shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+        shooter.set(0);
+    }
     void run() {
         SmartDashboard.putNumber("Shooter Fire Rate in RPM", shooter.getSpeed());
 //        SmartDashboard.put
