@@ -5,7 +5,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team3238.robot.Autonomous.*;
-
+import org.usfirst.frc.team3238.robot.Autonomous.Profiles.*;
 import java.util.ArrayList;
 
 public class Robot extends IterativeRobot implements PIDOutput
@@ -73,15 +73,15 @@ public class Robot extends IterativeRobot implements PIDOutput
         turnController.setOutputRange(-0.51625, 0.51625);
         turnController.setAbsoluteTolerance(kToleranceDegrees);
         turnController.setContinuous(true);
-        boilerStraightFirst = Profiles.boilerForwardFirst.Points;
-        boilerStraightSecond = Profiles.boilerForwardSecond.Points;
+        boilerStraightFirst = HardcodedProfiles.boilerForwardFirst.Points;
+        boilerStraightSecond = HardcodedProfiles.boilerForwardSecond.Points;
         setEncoderInversions();
         leftController = new MotionProfileExample(leftLeader);
         rightController = new MotionProfileExample(rightLeader);
         shooter = new Shooter(agitatorTalon, shooterTalon, joystick);
         setEncoderInversions();
         resetEncoderPosition();
-        CameraServer.getInstance().startAutomaticCapture();
+//        CameraServer.getInstance().startAutomaticCapture();
         SubPhaser = new SubsystemPhaser(collector, shooter);
     }
     
@@ -168,44 +168,46 @@ public class Robot extends IterativeRobot implements PIDOutput
         SubPhaser.calledCollect = false;
         switch(auto_selection) {
             case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
-                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, true, Phase.NONE));
-                auto.addPhase(new Phase(Profiles.leftSideBoilerShot.Points, Profiles.rightSideBoilerShot.Points, false, Phase.REVSHOOTGEAR));
-                auto.addPhase(new Phase(Profiles.leftSideBoilerShot.Points, Profiles.rightSideBoilerShot.Points, false, Phase.SHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, false, Phase.REVSHOOTGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, false, Phase.SHOOT));
                 break;
             case Constants.Autonomous.BOILERSIDE:
-                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, true, Phase.NONE));
 
-                auto.addPhase(new Phase(Profiles.leftBack.Points, Profiles.rightBack.Points, true, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, true, Phase.PLACEGEAR));
 
                 break;
 
             case Constants.Autonomous.CENTER:
-                auto.addPhase(new Phase(Profiles.centerLift.Points, Profiles.centerLift.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, true, Phase.NONE));
 
-                auto.addPhase(new Phase(Profiles.leftBack.Points, Profiles.rightBack.Points, true, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, true, Phase.PLACEGEAR));
                 break;
 
             case Constants.Autonomous.CENTERSHOOT:
-                auto.addPhase(new Phase(Profiles.centerLift.Points, Profiles.centerLift.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, true, Phase.NONE));
 
-                auto.addPhase(new Phase(Profiles.leftCenterBoilerShot.Points, Profiles.rightCenterBoilerShot.Points, true, Phase.REVSHOOTGEAR));
-                auto.addPhase(new Phase(Profiles.leftCenterBoilerShot.Points, Profiles.rightCenterBoilerShot.Points, false, Phase.SHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, true, Phase.REVSHOOTGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, false, Phase.SHOOT));
 
 
 
                 break;
+            case Constants.Autonomous.TESTMODE:
+                auto.addPhase(new Phase(testerALEFT.Points, testerARIGHT.Points, false, Phase.NONE));
 
             case Constants.Autonomous.RETRIEVALSIDE:
-                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, false, Phase.NONE));
-                auto.addPhase(new Phase(Profiles.leftBack.Points, Profiles.rightBack.Points, true, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, true, Phase.PLACEGEAR));
 
                 break;
 
             case Constants.Autonomous.RETRIEVALNEUTRALZONE:
-                auto.addPhase(new Phase(Profiles.leftBoiler.Points, Profiles.rightBoiler.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, false, Phase.NONE));
 
-                auto.addPhase(new Phase(Profiles.leftNZ.Points, Profiles.rightNZ.Points, false, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(Profiles.finishNZL.Points, Profiles.finishNZR.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, false, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, false, Phase.NONE));
 
                 break;
         }
@@ -378,35 +380,35 @@ public class Robot extends IterativeRobot implements PIDOutput
         navX.zeroYaw();
     }
     public void setSideSpeedProfile() {
-        leftController.setFedProfile(Profiles.rightBoiler.Points);
-        rightController.setFedProfile(Profiles.leftBoiler.Points);
+        leftController.setFedProfile(HardcodedProfiles.rightBoiler.Points);
+        rightController.setFedProfile(HardcodedProfiles.leftBoiler.Points);
     }
     public void setSideSpeedProfileRet() {
-        leftController.setFedProfile(Profiles.leftBoiler.Points);
-        rightController.setFedProfile(Profiles.rightBoiler.Points);
+        leftController.setFedProfile(HardcodedProfiles.leftBoiler.Points);
+        rightController.setFedProfile(HardcodedProfiles.rightBoiler.Points);
 
     }
     public void setCenterProfile() {
-        leftController.setFedProfile(Profiles.centerLift.Points);
+        leftController.setFedProfile(HardcodedProfiles.centerLift.Points);
 
-        rightController.setFedProfile(Profiles.centerLift.Points);
+        rightController.setFedProfile(HardcodedProfiles.centerLift.Points);
     }
     public void setSideBoilerShotProfile() {
-        leftController.setFedProfile(Profiles.leftSideBoilerShot.Points);
-        rightController.setFedProfile(Profiles.rightSideBoilerShot.Points);
+        leftController.setFedProfile(HardcodedProfiles.leftSideBoilerShot.Points);
+        rightController.setFedProfile(HardcodedProfiles.rightSideBoilerShot.Points);
     }
     public void setCenterBoilerShotProfile() {
-        leftController.setFedProfile(Profiles.leftSideBoilerShot.Points);
-        rightController.setFedProfile(Profiles.rightSideBoilerShot.Points);
+        leftController.setFedProfile(HardcodedProfiles.leftSideBoilerShot.Points);
+        rightController.setFedProfile(HardcodedProfiles.rightSideBoilerShot.Points);
     }
     public void setNZMoveProfile() {
-        leftController.setFedProfile(Profiles.leftNZ.Points);
-        rightController.setFedProfile(Profiles.rightNZ.Points);
+        leftController.setFedProfile(HardcodedProfiles.leftNZ.Points);
+        rightController.setFedProfile(HardcodedProfiles.rightNZ.Points);
     }
     public void setNZEndProfile() {
-        leftController.setFedProfile(Profiles.finishNZL.Points);
+        leftController.setFedProfile(HardcodedProfiles.finishNZL.Points);
 
-        rightController.setFedProfile(Profiles.finishNZR.Points);
+        rightController.setFedProfile(HardcodedProfiles.finishNZR.Points);
     }
 
     public void initMotionProfile() {

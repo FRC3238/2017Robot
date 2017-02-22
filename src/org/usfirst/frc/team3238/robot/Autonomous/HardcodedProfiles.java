@@ -3,7 +3,7 @@ package org.usfirst.frc.team3238.robot.Autonomous;
 /**
  * Created by Team 3238 on 2/17/2017.
  */
-public class Profiles
+public class HardcodedProfiles
 {
     public static class boilerForwardFirst {
         public static double[][] Points = new double[][]{
