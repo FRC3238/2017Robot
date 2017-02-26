@@ -32,6 +32,10 @@ public class SubsystemPhaser {
             case Phase.REVSHOOTGEAR:
                 shooter.autoPrep(Constants.Shooter.SHOOT_RPM);
                 placeGear();
+                break;
+            case Phase.QUICKSHOT:
+                shooter.quickShoot();
+                break;
         }
     }
     public void placeGear() {

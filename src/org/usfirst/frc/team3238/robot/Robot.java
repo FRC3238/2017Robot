@@ -24,6 +24,8 @@ public class Robot extends IterativeRobot implements PIDOutput
     boolean e = false;
     int auto_selection = 0;
     Phaser auto;
+    Joystick joy1 = new Joystick(0);
+    boolean RedSide = false;
     MotionProfileExample leftController, rightController;
     public static final double kP = 0.05,
                                 kI = 0.0,
@@ -52,7 +54,7 @@ public class Robot extends IterativeRobot implements PIDOutput
         CANTalon agitatorTalon = new CANTalon(Constants.Shooter.AGITATOR_TALON_ID);
         CANTalon shooterTalon = new CANTalon(Constants.Shooter.SHOOTER_TALON_ID);
         Joystick joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
-        
+
         climber = new Climber(climbTalonOne, climbTalonTwo, joystick);
         chassis = new Chassis(leftLeader, rightLeader,  joystick);
         collector = new Collector(leftCollect, rightCollect, liftCollect,
@@ -61,15 +63,15 @@ public class Robot extends IterativeRobot implements PIDOutput
         leftFollower.set(leftLeader.getDeviceID());
         rightFollower.changeControlMode(CANTalon.TalonControlMode.Follower);
         rightFollower.set(rightLeader.getDeviceID());
-        navX = new AHRS(SPI.Port.kMXP);
-
+        try {
+            navX = new AHRS(SPI.Port.kMXP);
+        } catch(Exception e) {}
         leftLeader.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
         leftLeader.configEncoderCodesPerRev(codesPerRev);
         rightLeader.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
         rightLeader.configEncoderCodesPerRev(codesPerRev);
         turnController = new PIDController(kP, kI, kD, kF, navX, this);
         turnController.setInputRange(-180.0f, 180.0f);
-
         turnController.setOutputRange(-0.51625, 0.51625);
         turnController.setAbsoluteTolerance(kToleranceDegrees);
         turnController.setContinuous(true);
@@ -81,19 +83,23 @@ public class Robot extends IterativeRobot implements PIDOutput
         shooter = new Shooter(agitatorTalon, shooterTalon, joystick);
         setEncoderInversions();
         resetEncoderPosition();
-//        CameraServer.getInstance().startAutomaticCapture();
+        CameraServer.getInstance().startAutomaticCapture();
+//        CameraServer.getInstance().
         SubPhaser = new SubsystemPhaser(collector, shooter);
     }
     
     @Override public void disabledPeriodic()
     {
+        shooter.init();
         resetEncoderPosition();
 //        DriverStation.reportError("Nav : " + navX.getAngle(), false);
         auto_selection = Preferences.getInstance().getInt("auto", 2 );
+        RedSide = Preferences.getInstance().getBoolean("RedSide", true);
         SmartDashboard.putNumber("Auto Found", auto_selection);
         notShooting = true;
     }
     int boilerChoice = 0;
+
     @Override public void autonomousInit()
     {
 //        auto_selection = Preferences.getInstance().getInt("auto", 3 );
@@ -156,8 +162,16 @@ public class Robot extends IterativeRobot implements PIDOutput
         collector.run();
         climber.run();
         shooter.run();
-        DriverStation.reportError("Left Enc Position: " + leftLeader.getEncPosition()
-        + "\nRight Enc Position: " + rightLeader.getEncPosition(), false);
+//        if(joy1.getRawButton(8))
+//        shooter.runDirect();
+//        else
+//            shooter.stop();
+//        shooter.run();
+//        shooter.printEnc();
+//        DriverStation.reportError("Left Enc Position: " + leftLeader.getEncPosition()
+//        + "\nRight Enc Position: " + rightLeader.getEncPosition(), false);
+
+//        SmartDashboard.putNumber("Shooter Encoder", shooter.shooter.getEncPosition());
     }
 
 
@@ -168,48 +182,53 @@ public class Robot extends IterativeRobot implements PIDOutput
         SubPhaser.calledCollect = false;
         switch(auto_selection) {
             case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, true, Phase.NONE));
-                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, false, Phase.REVSHOOTGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, false, Phase.SHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.SHOOT));
                 break;
             case Constants.Autonomous.BOILERSIDE:
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
 
-                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, true, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
 
                 break;
 
             case Constants.Autonomous.CENTER:
-                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
 
-                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, true, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
                 break;
 
             case Constants.Autonomous.CENTERSHOOT:
-                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
 
-                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, true, Phase.REVSHOOTGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, false, Phase.SHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, !RedSide, Phase.SHOOT));
 
 
 
                 break;
             case Constants.Autonomous.TESTMODE:
-                auto.addPhase(new Phase(testerALEFT.Points, testerARIGHT.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(testerALEFT.Points, testerARIGHT.Points, !RedSide, Phase.NONE));
 
             case Constants.Autonomous.RETRIEVALSIDE:
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, false, Phase.NONE));
-                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, true, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
 
                 break;
 
             case Constants.Autonomous.RETRIEVALNEUTRALZONE:
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
 
-                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, false, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE));
 
                 break;
+            case Constants.Autonomous.HOPPER_SHOOT:
+                auto.addPhase(new Phase(HopperHitLEFT.Points, HopperHitRIGHT.Points, RedSide, Phase.REVSHOOT));
+                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, RedSide, Phase.REVSHOOT, 1.0));
+                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, RedSide, Phase.QUICKSHOT));
+
         }
 
         initMotionProfile();
@@ -217,8 +236,9 @@ public class Robot extends IterativeRobot implements PIDOutput
     @Override public void testPeriodic()
     {
         if(auto.run(motionProfileLoop())) setNewMotionProfile();
+        DriverStation.reportWarning(""+auto.getCurrentPhase(), false);
         SubPhaser.run(auto.getCurrentPhase());
-        notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT;
+        notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT && auto.getCurrentPhase().subsystemProperty != Phase.QUICKSHOT;
 
     }//the greatest line ever
 

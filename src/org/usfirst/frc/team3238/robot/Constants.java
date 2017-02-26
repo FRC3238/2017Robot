@@ -67,7 +67,8 @@ public class Constants
     
     public class Shooter
     {
-        public static final int SHOOT_RPM = 3000;
+        public static final int DISTANCE_PORT = 0;
+        public static final int SHOOT_RPM = 10070;
         public static final int SHOOT_PREP_BUTTON = 7;
         public static final int SHOOT_BUTTON = 8;
         public static final int DISABLE_BUTTON = 3;
@@ -77,9 +78,10 @@ public class Constants
 
         public static final int CODES_PER_REV = 360;
         public static final double AGITATOR_SPEED = 0.55;
-        public static final int ALLOWED_RPM_ERROR = 30;
+        public static final int ALLOWED_RPM_ERROR = 60;
     }
     public class Autonomous {
-        public static final int TESTMODE = -1, DISABLE = 0, BOILERSIDESHOOT = 1, BOILERSIDE = 2, CENTER = 3, CENTERSHOOT = 4, RETRIEVALSIDE = 5, RETRIEVALNEUTRALZONE = 6;
+        public static final int TESTMODE = -1, DISABLE = 0, BOILERSIDESHOOT = 1, BOILERSIDE = 2, CENTER = 3, CENTERSHOOT = 4, RETRIEVALSIDE = 5, RETRIEVALNEUTRALZONE = 6,
+        HOPPER_SHOOT = 7;
     }
 }

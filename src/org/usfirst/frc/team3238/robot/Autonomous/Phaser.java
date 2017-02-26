@@ -1,5 +1,8 @@
 package org.usfirst.frc.team3238.robot.Autonomous;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+
 import java.util.ArrayList;
 
 /**
@@ -7,6 +10,7 @@ import java.util.ArrayList;
  */
 public class Phaser {
     public ArrayList<Phase> PhaseCollection;
+    Timer delayTimer = new Timer();
     public Phaser() {
         PhaseCollection = new ArrayList<Phase>();
     }
@@ -20,13 +24,23 @@ public class Phaser {
         return PhaseCollection.get(0).getRightProfile();
     }
     public boolean run(boolean finishedProfile) {
-        if(finishedProfile) {
-            if(PhaseCollection.size() > 1) {
-                PhaseCollection.remove(0);
-                return true;
+        if (finishedProfile) {
+            delayTimer.start();
+            if (PhaseCollection.size() > 1) {
+                if (delayTimer.get() >= PhaseCollection.get(0).getDelay()) {
+                    DriverStation.reportError("Delay Achieved", false);
+
+                    PhaseCollection.remove(0);
+                    return true;
+                } else {
+                    return false;
+//                return true;
+                }
             }
         }
-        return false;
+            delayTimer.reset();
+            return false;
+
     }
     public Phase getCurrentPhase() {
         if(PhaseCollection.size() > 0)
