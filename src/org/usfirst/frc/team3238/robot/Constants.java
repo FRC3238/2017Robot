@@ -78,10 +78,11 @@ public class Constants
 
         public static final int CODES_PER_REV = 360;
         public static final double AGITATOR_SPEED = 0.55;
-        public static final int ALLOWED_RPM_ERROR = 60;
+        public static final int ALLOWED_RPM_ERROR = 10;
     }
     public class Autonomous {
         public static final int TESTMODE = -1, DISABLE = 0, BOILERSIDESHOOT = 1, BOILERSIDE = 2, CENTER = 3, CENTERSHOOT = 4, RETRIEVALSIDE = 5, RETRIEVALNEUTRALZONE = 6,
         HOPPER_SHOOT = 7;
+        public static final int BOILERSIDESHOOTBLUE = 8;
     }
 }

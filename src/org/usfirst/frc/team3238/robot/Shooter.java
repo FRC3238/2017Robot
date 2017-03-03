@@ -14,6 +14,7 @@ public class Shooter {
     private CANTalon agitator, shooter;
     private Joystick joy;
     private AnalogInput distSensor;
+    private int rpmCounter = 0;
     private boolean ready = false;
 
     Shooter(CANTalon agitator, CANTalon shooter, Joystick joy) {
@@ -23,6 +24,7 @@ public class Shooter {
         shooter.configPeakOutputVoltage(+12.0f, 0.0f);
         shooter.reverseSensor(true);
         shooter.reverseOutput(false);
+        shooter.setProfile(0);
 
         agitator.setInverted(true);
 
@@ -37,12 +39,23 @@ public class Shooter {
         shooter.set(0.0);
         shooter.setEncPosition(0);
         SmartDashboard.putNumber("Shooter Encoder", shooter.getEncPosition());
+        SmartDashboard.putNumber("Distance Sensor", distSensor.getAverageValue());
+        ready = false;
     }
 
     public void autoPrep(int rpm) {
-        shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
-        shooter.set(rpm);
-        agitator.set(0);
+        if (rpm != -1) {
+            shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+            shooter.set(rpm);
+            agitator.set(0);
+        } else {
+            double distance = distanceMap();
+            SmartDashboard.putNumber("Distance Mapped", distance);
+            int shootSpeedRPM = getRPM(distance);
+            shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+            shooter.set(shootSpeedRPM);
+            agitator.set(0);
+        }
     }
     public void autoShoot() {
         if(isWithinRPM(Constants.Shooter.SHOOT_RPM)) {
@@ -83,6 +96,13 @@ public class Shooter {
         DriverStation.reportError("Shooter ENC: " + shooter.getEncPosition(), false);
     }
 
+    public void calculateFeedForward()
+    {
+        shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+        shooter.set(0.5);
+        SmartDashboard.putNumber("Feed Forward", (0.5 * 1023) / ((shooter.getSpeed() / 600) * 4096));
+    }
+
     void run() {
 
 
@@ -93,9 +113,12 @@ public class Shooter {
 //        SmartDashboard.putNumber("Shooter P val", shooter.getP());
 //        SmartDashboard.putNumber("Prefs speed", Preferences.getInstance().getInt("Shooter Speed", 1));
 //        SmartDashboard.putNumber("Throttle speed", (joy.getThrottle() + 1) / 2);
-        int shootSpeedRPM = Preferences.getInstance().getInt("Shooter Speed", 1);
+        double distance = distanceMap();
+        SmartDashboard.putNumber("Distance Mapped", distance);
+        int shootSpeedRPM = getRPM(distance);
         SmartDashboard.putNumber("Recieved Shoot SpeedRPM", shootSpeedRPM);
         SmartDashboard.putNumber("Shooter Encoder", shooter.getEncPosition());
+        int pidSlot = Preferences.getInstance().getInt("PID Slot", 0);
         if (joy.getRawButton(Constants.Shooter.SHOOT_PREP_BUTTON))
             ready = true;
         else if(joy.getRawButton(Constants.Shooter.DISABLE_BUTTON))
@@ -104,8 +127,6 @@ public class Shooter {
             shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
             shooter.set(shootSpeedRPM);
             SmartDashboard.putNumber("sdiogjsoijgj", shooter.getSpeed());
-
-            SmartDashboard.putNumber("Distance Sensor", distSensor.getAverageValue());
 //            shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
 //            shooter.set((joy.getThrottle() + 1) / 2);
         } else {
@@ -118,15 +139,35 @@ public class Shooter {
         if (joy.getRawButton(Constants.Shooter.SHOOT_BUTTON) && ready) {
             DriverStation.reportError("" + shootSpeedRPM + ", " + shooter.getSpeed() + " " + (shootSpeedRPM - shooter.getSpeed()) + "\n" + Math.abs(shootSpeedRPM - shooter.getSpeed()), false);
             if (isWithinRPM(shootSpeedRPM)) {
-                agitator.set(agitatorSpeed);
+                rpmCounter++;
             } else {
-                agitator.set(0);
+                rpmCounter = 0;
                 DriverStation.reportError("Not at RPM", false);
             }
+            SmartDashboard.putNumber("Hopper speed", shooter.getSpeed());
+
+            if (rpmCounter > 4)
+            {
+                agitator.set(agitatorSpeed);
+                SmartDashboard.putNumber("Hopper activated speed", shooter.getSpeed());
+            } else {
+                agitator.set(0.0);
+            }
         } else if (joy.getRawButton(10) && ready) {
+            SmartDashboard.putNumber("Hopper activated speed", shooter.getSpeed());
             agitator.set(agitatorSpeed);
         } else {
             agitator.set(0.0);
         }
+    }
+
+    private double distanceMap()
+    {
+        return ((distSensor.getAverageValue() - 14.6773) / 119.68) + 0.3333;
+    }
+
+    private int getRPM(double distance)
+    {
+        return (int) (7950 + 125 * distance + 10 * Math.pow(distance, 2));
     }
 }
