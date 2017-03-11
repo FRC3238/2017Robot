@@ -40,19 +40,33 @@ public class Robot extends IterativeRobot implements PIDOutput
     @Override public void robotInit()
     {
         auto = new Phaser();
-        leftLeader = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_A);
-        CANTalon leftFollower = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_B);
-        rightLeader = new CANTalon(
-                Constants.Chassis.DRIVE_TALON_ID_RIGHT_A);
-        CANTalon rightFollower = new CANTalon(
-                Constants.Chassis.DRIVE_TALON_ID_RIGHT_B);
-        CANTalon leftCollect = new CANTalon(Constants.Collector.LEFT_TALON_ID);
-        CANTalon rightCollect = new CANTalon(Constants.Collector.RIGHT_TALON_ID);
-        CANTalon liftCollect = new CANTalon(Constants.Collector.LIFT_TALON_ID);
-        CANTalon climbTalonOne = new CANTalon(Constants.Climber.CLIMB_TALON_ONE_ID);
-        CANTalon climbTalonTwo = new CANTalon(Constants.Climber.CLIMB_TALON_TWO_ID);
-        CANTalon agitatorTalon = new CANTalon(Constants.Shooter.AGITATOR_TALON_ID);
-        CANTalon shooterTalon = new CANTalon(Constants.Shooter.SHOOTER_TALON_ID);
+        CANTalon leftFollower = null;
+        CANTalon rightFollower = null;
+        CANTalon leftCollect = null;
+        CANTalon rightCollect = null;
+        CANTalon liftCollect = null;
+        CANTalon climbTalonOne = null;
+        CANTalon climbTalonTwo = null;
+        CANTalon agitatorTalon = null;
+        CANTalon shooterTalon = null;
+        try {
+            leftLeader = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_A);
+            leftFollower = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_B);
+            rightLeader = new CANTalon(
+                    Constants.Chassis.DRIVE_TALON_ID_RIGHT_A);
+            rightFollower = new CANTalon(
+                    Constants.Chassis.DRIVE_TALON_ID_RIGHT_B);
+            leftCollect = new CANTalon(Constants.Collector.LEFT_TALON_ID);
+            rightCollect = new CANTalon(Constants.Collector.RIGHT_TALON_ID);
+            liftCollect = new CANTalon(Constants.Collector.LIFT_TALON_ID);
+            climbTalonOne = new CANTalon(Constants.Climber.CLIMB_TALON_ONE_ID);
+            climbTalonTwo = new CANTalon(Constants.Climber.CLIMB_TALON_TWO_ID);
+            agitatorTalon = new CANTalon(Constants.Shooter.AGITATOR_TALON_ID);
+            shooterTalon = new CANTalon(Constants.Shooter.SHOOTER_TALON_ID);
+        } catch (Exception e1) {
+            DriverStation.reportError("CHECK YOUR CAN BUS, DRIVERS!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + e1.getMessage(), false);
+        }
+        
         Joystick joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
 
         climber = new Climber(climbTalonOne, climbTalonTwo, joystick);
@@ -86,6 +100,8 @@ public class Robot extends IterativeRobot implements PIDOutput
         CameraServer.getInstance().startAutomaticCapture();
 //        CameraServer.getInstance().
         SubPhaser = new SubsystemPhaser(collector, shooter);
+        SmartDashboard.putNumber("auto", auto_selection);
+        SmartDashboard.putBoolean("Red Side", false);
     }
     
     @Override public void disabledPeriodic()
@@ -93,10 +109,12 @@ public class Robot extends IterativeRobot implements PIDOutput
         shooter.init();
         resetEncoderPosition();
 //        DriverStation.reportError("Nav : " + navX.getAngle(), false);
-        auto_selection = Preferences.getInstance().getInt("auto", 2 );
-        RedSide = Preferences.getInstance().getBoolean("RedSide", true);
+        auto_selection = (int) SmartDashboard.getNumber("auto", 0);
+        RedSide = SmartDashboard.getBoolean("Red Side", true);
         SmartDashboard.putNumber("Auto Found", auto_selection);
         notShooting = true;
+
+
     }
     int boilerChoice = 0;
 
@@ -154,9 +172,9 @@ public class Robot extends IterativeRobot implements PIDOutput
 
                 break;
             case Constants.Autonomous.HOPPER_SHOOT:
-                auto.addPhase(new Phase(HopperHitLEFT.Points, HopperHitRIGHT.Points, RedSide, Phase.REVSHOOT));
-                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, RedSide, Phase.REVSHOOT, 1.0));
-                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, RedSide, Phase.QUICKSHOT));
+                auto.addPhase(new Phase(HopperHitLEFT.Points, HopperHitRIGHT.Points, !RedSide, Phase.NONE));
+                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.REVSHOOT, 1.0));
+                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.QUICKSHOT));
 
         }
 

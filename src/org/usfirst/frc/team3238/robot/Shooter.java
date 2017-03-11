@@ -39,7 +39,7 @@ public class Shooter {
         shooter.set(0.0);
         shooter.setEncPosition(0);
         SmartDashboard.putNumber("Shooter Encoder", shooter.getEncPosition());
-        SmartDashboard.putNumber("Distance Sensor", distSensor.getAverageValue());
+        SmartDashboard.putNumber("Distance Sensor", distanceMap());
         ready = false;
     }
 
@@ -52,6 +52,7 @@ public class Shooter {
             double distance = distanceMap();
             SmartDashboard.putNumber("Distance Mapped", distance);
             int shootSpeedRPM = getRPM(distance);
+            SmartDashboard.putNumber("Auto Shooter RPM", shooter.getSpeed());
             shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
             shooter.set(shootSpeedRPM);
             agitator.set(0);
@@ -114,7 +115,7 @@ public class Shooter {
 //        SmartDashboard.putNumber("Prefs speed", Preferences.getInstance().getInt("Shooter Speed", 1));
 //        SmartDashboard.putNumber("Throttle speed", (joy.getThrottle() + 1) / 2);
         double distance = distanceMap();
-        SmartDashboard.putNumber("Distance Mapped", distance);
+        SmartDashboard.putNumber("Distance Sensor", distance);
         int shootSpeedRPM = getRPM(distance);
         SmartDashboard.putNumber("Recieved Shoot SpeedRPM", shootSpeedRPM);
         SmartDashboard.putNumber("Shooter Encoder", shooter.getEncPosition());
@@ -163,7 +164,8 @@ public class Shooter {
 
     private double distanceMap()
     {
-        return ((distSensor.getAverageValue() - 14.6773) / 119.68) + 0.3333;
+        SmartDashboard.putNumber("Throttle", joy.getThrottle());
+        return ((distSensor.getAverageValue() - 14.6773) / 119.68) + 0.3333-(joy.getThrottle());
     }
 
     private int getRPM(double distance)
