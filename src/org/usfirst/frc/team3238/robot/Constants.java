@@ -14,6 +14,7 @@ public class Constants
         public static final double TWIST_MAX_THRESHOLD = 0.75;
         
         public static final double TWIST_SCALE = -0.3;
+        public static final double NO_SHOOTER_TWIST_SCALE = -0.25;
         public static final double MOVE_SCALE = 0.8;
 
         public static final double PLACING_GEAR_SPEED = 0.5;

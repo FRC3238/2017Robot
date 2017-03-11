@@ -4,8 +4,11 @@ import com.ctre.CANTalon;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.BaseSystemNotInitializedException;
 import org.usfirst.frc.team3238.robot.Autonomous.*;
 import org.usfirst.frc.team3238.robot.Autonomous.Profiles.*;
+
+import java.sql.Driver;
 import java.util.ArrayList;
 
 public class Robot extends IterativeRobot implements PIDOutput
@@ -37,6 +40,8 @@ public class Robot extends IterativeRobot implements PIDOutput
     double rotateToAngleRate = 0.0;
     private int codesPerRev = 360;
     boolean notShooting = true;
+    boolean shooterDisabled = false;
+    boolean talonsDisabled = false;
     @Override public void robotInit()
     {
         auto = new Phaser();
@@ -66,11 +71,17 @@ public class Robot extends IterativeRobot implements PIDOutput
         } catch (Exception e1) {
             DriverStation.reportError("CHECK YOUR CAN BUS, DRIVERS!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + e1.getMessage(), false);
         }
-        
+        DriverStation.reportWarning(""+shooterTalon.getIZone(),false);
+        if(shooterTalon.GetFirmwareVersion() == 0.0) {
+            shooterDisabled = true;
+        }
+        if(leftLeader.GetFirmwareVersion() == 0.0 || rightLeader.GetFirmwareVersion() == 0.0 || leftFollower.GetFirmwareVersion() == 0.0 || rightFollower.GetFirmwareVersion() == 0.0)
+            throw new BaseSystemNotInitializedException("Drive Talons Disabled");
         Joystick joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
 
         climber = new Climber(climbTalonOne, climbTalonTwo, joystick);
         chassis = new Chassis(leftLeader, rightLeader,  joystick);
+        chassis.setShooterDisabled(shooterDisabled);
         collector = new Collector(leftCollect, rightCollect, liftCollect,
                 joystick);
         leftFollower.changeControlMode(CANTalon.TalonControlMode.Follower);
@@ -106,6 +117,10 @@ public class Robot extends IterativeRobot implements PIDOutput
     
     @Override public void disabledPeriodic()
     {
+        if(talonsDisabled)
+            System.exit(0);
+        if(shooterDisabled)
+            DriverStation.reportWarning("No Shooter", false);
         shooter.init();
         resetEncoderPosition();
 //        DriverStation.reportError("Nav : " + navX.getAngle(), false);

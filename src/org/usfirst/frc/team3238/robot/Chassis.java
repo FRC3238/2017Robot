@@ -1,10 +1,7 @@
 package org.usfirst.frc.team3238.robot;
 
 import com.ctre.CANTalon;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.*;
 
 /**
  * Created by BUTLEJEF000 on 1/16/2017.
@@ -14,7 +11,7 @@ public class Chassis {
     private CANTalon leftLeader, rightLeader;
     private Joystick joy;
     private Timer timer;
-
+    private boolean ShooterDisabled = false;
     private boolean placingInit = false;
     private String state = "default";
 
@@ -53,7 +50,11 @@ public class Chassis {
             if (Math.abs(joy.getTwist()) >= Constants.Chassis.TWIST_MAX_THRESHOLD) {
                 twist = -joy.getTwist();
             } else if (Math.abs(joy.getTwist()) >= Constants.Chassis.TWIST_DEADZONE) {
-                twist = joy.getTwist() * Constants.Chassis.TWIST_SCALE;
+                if(!ShooterDisabled) {
+                    twist = joy.getTwist() * Constants.Chassis.TWIST_SCALE;
+                } else {
+                    twist = joy.getTwist() * Constants.Chassis.NO_SHOOTER_TWIST_SCALE;
+                }
             } else {
                 twist = 0.0;
             }
@@ -84,6 +85,9 @@ public class Chassis {
         autoRun(y, twist);
     }
 
+    public void setShooterDisabled(boolean shooterDisabled) {
+        this.ShooterDisabled = shooterDisabled;
+    }
     public void autoRun(double y, double twist) {
 //        driveTrain.arcadeDrive(y, twist);
         switch (state) {
