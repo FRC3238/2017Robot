@@ -87,7 +87,23 @@ public class Collector {
             SmartDashboard.putNumber("Current count", currentCounter);
         }
     }
+    Timer t = new Timer();
+    boolean gotGear = false;
+    public void disable() {
 
+    }
+    public void spinToWin() {
+        spinTake(0.3,0.5);
+    }
+    public boolean containsGear() {
+
+        gotGear = leftIntake.isRevLimitSwitchClosed();
+        if(!gotGear)
+            setIntake(Constants.Collector.INTAKE_POWER/2);
+
+
+        return gotGear;
+    }
     private void manualControls(double liftPower, double intakePower) {
         if (joy.getPOV() == Constants.Collector.COLLECT_IN_POV) {
             state = "manual";
@@ -142,6 +158,10 @@ public class Collector {
     private void setIntake(double power) {
         leftIntake.set(power);
         rightIntake.set(-power);
+    }
+    private void spinTake(double power, double pow) {
+        leftIntake.set(power);
+        rightIntake.set(pow);
     }
 
     private void watchJoy(int button, String state) {

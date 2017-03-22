@@ -74,9 +74,15 @@ public class Robot extends IterativeRobot implements PIDOutput
         DriverStation.reportWarning(""+shooterTalon.getIZone(),false);
         if(shooterTalon.GetFirmwareVersion() == 0.0) {
             shooterDisabled = true;
+            DriverStation.reportWarning("Shooter is not on the robot", false);
+        } else
+        {
+            DriverStation.reportWarning("Shooter is detected", false);
         }
-        if(leftLeader.GetFirmwareVersion() == 0.0 || rightLeader.GetFirmwareVersion() == 0.0 || leftFollower.GetFirmwareVersion() == 0.0 || rightFollower.GetFirmwareVersion() == 0.0)
+        if(leftLeader.GetFirmwareVersion() == 0.0 || rightLeader.GetFirmwareVersion() == 0.0 || leftFollower.GetFirmwareVersion() == 0.0 || rightFollower.GetFirmwareVersion() == 0.0) {
+            DriverStation.reportError("AT LEAST ONE OF YOUR DRIVE TALONS IS DEAD!!!!!!!!!!!!!!!", false);
             throw new BaseSystemNotInitializedException("Drive Talons Disabled");
+        }
         Joystick joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
 
         climber = new Climber(climbTalonOne, climbTalonTwo, joystick);
@@ -216,7 +222,7 @@ public class Robot extends IterativeRobot implements PIDOutput
     
     @Override public void teleopPeriodic()
     {
-        chassis.proRun();
+        chassis.run();
         collector.run();
         climber.run();
         shooter.run();
@@ -236,74 +242,16 @@ public class Robot extends IterativeRobot implements PIDOutput
     boolean gear = false;
     @Override public void testInit()
     {
-        // MOVED TO AUTO INIT
-//        auto.PhaseCollection.clear();
-//        SubPhaser.calledCollect = false;
-//        switch(auto_selection) {
-//            case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
-//                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
-//                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.QUICKSHOT));
-//                break;
-//            case Constants.Autonomous.BOILERSIDE:
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
-//
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
-//
-//                break;
-//
-//            case Constants.Autonomous.BOILERSIDESHOOTBLUE:
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, false, Phase.NONE));
-//                auto.addPhase(new Phase(HardcodedProfiles.sideBoilerShotBlueLeft.Points, HardcodedProfiles.sideBoilerShotBlueRight.Points, true, Phase.REVSHOOTGEAR));
-//                auto.addPhase(new Phase(HardcodedProfiles.sideBoilerShotBlueLeft.Points, HardcodedProfiles.sideBoilerShotBlueRight.Points, true, Phase.QUICKSHOT));
-//                break;
-//            case Constants.Autonomous.CENTER:
-//                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
-//
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
-//                break;
-//
-//            case Constants.Autonomous.CENTERSHOOT:
-//                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
-//
-//                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
-//                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, !RedSide, Phase.SHOOT));
-//
-//
-//
-//                break;
-//            case Constants.Autonomous.TESTMODE:
-//                auto.addPhase(new Phase(testerALEFT.Points, testerARIGHT.Points, !RedSide, Phase.NONE));
-//
-//            case Constants.Autonomous.RETRIEVALSIDE:
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
-//
-//                break;
-//
-//            case Constants.Autonomous.RETRIEVALNEUTRALZONE:
-//                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
-//
-//                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR)); // Cheesy Poofs
-//                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE));
-//
-//                break;
-//            case Constants.Autonomous.HOPPER_SHOOT:
-//                auto.addPhase(new Phase(HopperHitLEFT.Points, HopperHitRIGHT.Points, RedSide, Phase.REVSHOOT));
-//                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, RedSide, Phase.REVSHOOT, 1.0));
-//                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, RedSide, Phase.QUICKSHOT));
-//
-//        }
-//
-//        initMotionProfile();
+        setMotorsDriveMode();
     }
     @Override public void testPeriodic()
     {
-        // MOVED TO AUTO PERIODIC
-//        if(auto.run(motionProfileLoop())) setNewMotionProfile();
-//        DriverStation.reportWarning(""+auto.getCurrentPhase(), false);
-//        SubPhaser.run(auto.getCurrentPhase());
-//        notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT && auto.getCurrentPhase().subsystemProperty != Phase.QUICKSHOT;
+       chassis.disable();
+        if(joy1.getRawButton(1) && !collector.containsGear())
+            DriverStation.reportWarning(""+collector.containsGear(), false);
+        else
+        collector.run();
+
 
     }
 

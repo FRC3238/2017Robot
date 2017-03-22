@@ -30,7 +30,10 @@ public class Chassis {
         timer.start();
         state = "placing";
     }
-
+    public void disable() {
+        leftLeader.set(0);
+        rightLeader.set(0);
+    }
     public void run() {
             if (joy.getRawButton(Constants.Collector.PLACE_GEAR_BUTTON) && !placingInit) {
                 placeGear();
@@ -53,7 +56,7 @@ public class Chassis {
                 if(!ShooterDisabled) {
                     twist = joy.getTwist() * Constants.Chassis.TWIST_SCALE;
                 } else {
-                    twist = joy.getTwist() * Constants.Chassis.NO_SHOOTER_TWIST_SCALE;
+                    twist = joy.getTwist() * Constants.Chassis.SHOOTER_TWIST_SCALE;
                 }
             } else {
                 twist = 0.0;

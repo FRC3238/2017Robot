@@ -13,8 +13,8 @@ public class Constants
         public static final double TWIST_DEADZONE = 0.3;
         public static final double TWIST_MAX_THRESHOLD = 0.75;
         
-        public static final double TWIST_SCALE = -0.3;
-        public static final double NO_SHOOTER_TWIST_SCALE = -0.25;
+        public static final double TWIST_SCALE = -0.6;
+        public static final double SHOOTER_TWIST_SCALE = -0.9;
         public static final double MOVE_SCALE = 0.8;
 
         public static final double PLACING_GEAR_SPEED = 0.5;
@@ -56,12 +56,12 @@ public class Constants
         public static final int PLACE_GEAR_BUTTON = 1;
         public static final int DISABLE_BUTTON = 3;
 
-        public static final double INTAKE_POWER = -0.5;
-        public static final double RAISE_POWER = 0.4;
-        public static final double LOWER_POWER = -0.4;
+        public static final double INTAKE_POWER = -0.65;
+        public static final double RAISE_POWER = 0.55;
+        public static final double LOWER_POWER = -0.55;
         public static final double PLACE_GEAR_POWER = -0.7;
         public static final int ENCODER_GEAR_BOTTOM_LIMIT = -600;
-        public static final int CURRENT_THRESHOLD = 12;
+        public static final int CURRENT_THRESHOLD = 25;
         public static final int CURRENT_CYCLES_INCREASE = 10;
         public static final int CURRENT_CYCLES_THRESH = 30;
     }
