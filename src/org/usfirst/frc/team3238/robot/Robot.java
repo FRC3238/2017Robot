@@ -137,7 +137,16 @@ public class Robot extends IterativeRobot implements PIDOutput
     {
         auto.PhaseCollection.clear();
         SubPhaser.calledCollect = false;
+        SmartDashboard.putNumber("autosel", auto_selection);
+        auto_selection = Constants.Autonomous.MLG_HOPPER;
+//        DriverStation.reportError("Auto Selected: " + auto_selection, false);
         switch(auto_selection) {
+            case Constants.Autonomous.MLG_HOPPER:
+                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, RedSide, Phase.NONE));
+                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, RedSide, Phase.NONE));
+                auto.addPhase(new Phase(hopperShootTurnLEFT.Points, hopperShootTurnRIGHT.Points, RedSide, Phase.REVSHOOT));
+                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, RedSide, Phase.QUICKSHOT));
+break;
             case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
                 auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
@@ -324,13 +333,14 @@ public class Robot extends IterativeRobot implements PIDOutput
     public void pollProfileStatus()
     {
         leftLeader.getMotionProfileStatus(_status);
+        SmartDashboard.putNumber("LeftTarget", leftLeader.getSetpoint());
         rightLeader.getMotionProfileStatus(_status);
     }
     public boolean motionProfileLoop()
     {
         pollProfileStatus();
-        DriverStation.reportWarning(
-                "auto periodic: MP status = " + _status.toString(), false);
+//        DriverStation.reportWarning(
+//                "auto periodic: MP status = " + _status.toString(), false);
         if(notShooting)
         switch(controlStatus)
         {
@@ -344,7 +354,7 @@ public class Robot extends IterativeRobot implements PIDOutput
                 controlStatus++;
                 return e;
             default:
-                DriverStation.reportWarning("auto case 1", false);
+//                DriverStation.reportWarning("auto case 1", false);
                 // _talon.set(CANTalon.SetValueMotionProfile.Enable.value);
                 if(!e)
                 {
@@ -359,7 +369,8 @@ public class Robot extends IterativeRobot implements PIDOutput
                             + leftLeader.getClosedLoopError());
                 }
 
-
+                DriverStation.reportError("Active Point Valid:" + _status.activePointValid +"\n" +
+                        "lastPoint: " + _status.activePoint.isLastPoint, false);
                 if(_status.activePointValid && _status.activePoint.isLastPoint)
                 {
                     SmartDashboard.putNumber("Loops", controlCalls);
