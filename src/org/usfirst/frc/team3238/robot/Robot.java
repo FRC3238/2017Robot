@@ -185,8 +185,8 @@ public class Robot extends IterativeRobot {
             case Constants.Autonomous.RETRIEVALNEUTRALZONE:
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
 
-                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR), collector);
+                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE), collector);
 
                 break;
             case Constants.Autonomous.HOPPER_SHOOT:
@@ -224,14 +224,15 @@ public class Robot extends IterativeRobot {
 
     @Override
     public void teleopPeriodic() {
-        if (joy1.getRawButton(12)) {
-            chassis.resetNavX();
-        }
-        if (joy1.getRawButton(9)) {
-            chassis.rotateToAngle(90);
-        }
+//        if (joy1.getRawButton(12)) {
+//            chassis.resetNavX();
+//        }
+//        if (joy1.getRawButton(9)) {
+//            chassis.rotateToAngle(90);
+//        }
 //        DriverStation.reportWarning("");
-        chassis.printAngle();
+//        chassis.printAngle();
+
         chassis.run();
         collector.run();
         climber.run();
@@ -255,16 +256,12 @@ public class Robot extends IterativeRobot {
     public void testInit() {
         setMotorsDriveMode();
         chassis.init();
-        chassis.rotateToAngle(90);
+//        chassis.rotateToAngle(90);
     }
 
     @Override
     public void testPeriodic() {
-        chassis.printAngle();
-        if (joy1.getRawButton(12)) {
-            chassis.resetNavX();
-        }
-        chassis.run();
+        SmartDashboard.putBoolean("Collector has gear?", collector.containsGear());
     }
 
     Notifier _notifer = new Notifier(new PeriodicRunnable());

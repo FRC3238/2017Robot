@@ -5,13 +5,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.usfirst.frc.team3238.robot.Autonomous.Phaser;
 
 /**
  * Class to control Gear Collector
  *
  * @author aaron
  */
-public class Collector {
+public class Collector implements Phaser.SkipCondition {
     private CANTalon leftIntake, rightIntake;
     private CANTalon lift;
     private Joystick joy;
@@ -100,6 +101,8 @@ public class Collector {
         gotGear = leftIntake.isRevLimitSwitchClosed();
         if(!gotGear)
             setIntake(Constants.Collector.INTAKE_POWER/2);
+        else
+            setIntake(0.0);
 
 
         return gotGear;
@@ -191,5 +194,10 @@ public class Collector {
             currentMult = 1.2;
             DriverStation.reportWarning("COLLECTOR INTAKE MIGHT BE STUCK!!!", false);
         }
+    }
+
+    @Override
+    public boolean skip() {
+        return containsGear();
     }
 }
