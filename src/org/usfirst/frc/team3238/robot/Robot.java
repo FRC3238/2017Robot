@@ -220,6 +220,7 @@ public class Robot extends IterativeRobot {
         collector.init();
         chassis.init();
         setMotorsDriveMode();
+        collector.placeGearAuto();
     }
 
     @Override

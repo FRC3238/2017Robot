@@ -29,6 +29,7 @@ public class Collector implements Phaser.SkipCondition {
         lift.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
         lift.configEncoderCodesPerRev(1044);
         lift.enableZeroSensorPositionOnReverseLimit(true);
+        lift.enableZeroSensorPositionOnForwardLimit(true);
 
         this.leftIntake = leftIntake;
         this.rightIntake = rightIntake;
@@ -45,6 +46,10 @@ public class Collector implements Phaser.SkipCondition {
 
     public void placeGear() {
         state = "placing";
+    }
+
+    public void placeGearAuto() {
+        state = "placing auto";
     }
 
     public void run() {
@@ -71,6 +76,10 @@ public class Collector implements Phaser.SkipCondition {
                 watchJoy(Constants.Collector.DISABLE_BUTTON, "inactive");
                 watchJoy(Constants.Collector.COLLECT_GROUND_BUTTON,
                         "collecting ground");
+                watchEncoder();
+                break;
+            case "placing auto":
+                manualControls(Constants.Collector.PLACE_GEAR_POWER, -Constants.Collector.INTAKE_POWER / 3);
                 watchEncoder();
                 break;
             case "manual":
