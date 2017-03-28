@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.util.BaseSystemNotInitializedException;
 import org.usfirst.frc.team3238.robot.Autonomous.*;
 import org.usfirst.frc.team3238.robot.Autonomous.Profiles.*;
 
-import java.sql.Driver;
 import java.util.ArrayList;
 
 public class Robot extends IterativeRobot {
@@ -185,7 +184,7 @@ public class Robot extends IterativeRobot {
             case Constants.Autonomous.RETRIEVALNEUTRALZONE:
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
 
-                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR), collector);
+                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR));
                 auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE), collector);
 
                 break;
@@ -257,12 +256,20 @@ public class Robot extends IterativeRobot {
     public void testInit() {
         setMotorsDriveMode();
         chassis.init();
-//        chassis.rotateToAngle(90);
+        collector.init();
     }
 
     @Override
     public void testPeriodic() {
-        SmartDashboard.putBoolean("Collector has gear?", collector.containsGear());
+        chassis.run();
+        collector.run();
+        climber.run();
+        shooter.run();
+        if(joy1.getRawButton(9))
+        {
+            collector.placeGearAuto();
+            chassis.placeGear();
+        }
     }
 
     Notifier _notifer = new Notifier(new PeriodicRunnable());

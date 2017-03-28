@@ -12,6 +12,7 @@ public class Phaser {
     public ArrayList<Phase> PhaseCollection;
     public ArrayList<SkipCondition> skipCollection;
     Timer delayTimer = new Timer();
+    Timer skipTimer = new Timer();
     public Phaser() {
         PhaseCollection = new ArrayList<Phase>();
         skipCollection = new ArrayList<SkipCondition>();
@@ -49,15 +50,24 @@ public class Phaser {
                 if (delayTimer.get() >= PhaseCollection.get(0).getDelay()) {
                     DriverStation.reportError("Delay Achieved", false);
 
-                    if(skipCollection.get(0).skip())
-                    {
-                        DriverStation.reportError("Gear is still onboard!", false);
+                    if (PhaseCollection.size() > 1) {
                         PhaseCollection.remove(0);
                         skipCollection.remove(0);
                     }
                     if (PhaseCollection.size() > 1) {
-                        PhaseCollection.remove(0);
-                        skipCollection.remove(0);
+                        boolean skip = false;
+                        skipTimer.start();
+                        while(skipTimer.get() < 0.5)
+                        {
+                            skip = skipCollection.get(0).skip();
+                        }
+                        skipTimer.stop();
+                        skipTimer.reset();
+                        if (skip) {
+                            DriverStation.reportError("Gear is still onboard!", false);
+                            PhaseCollection.remove(0);
+                            skipCollection.remove(0);
+                        }
                     }
                     return true;
                 } else {

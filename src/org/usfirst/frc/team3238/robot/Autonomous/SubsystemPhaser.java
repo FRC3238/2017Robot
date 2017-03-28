@@ -1,7 +1,6 @@
 package org.usfirst.frc.team3238.robot.Autonomous;
 
 import org.usfirst.frc.team3238.robot.Constants;
-import org.usfirst.frc.team3238.robot.Robot;
 import org.usfirst.frc.team3238.robot.Shooter;
 import org.usfirst.frc.team3238.robot.Collector;
 
@@ -12,12 +11,14 @@ public class SubsystemPhaser {
     Collector collector;
     Shooter shooter;
     public boolean calledCollect = false;
+
     public SubsystemPhaser(Collector collector, Shooter shooter) {
         this.collector = collector;
         this.shooter = shooter;
     }
+
     public void run(Phase current) {
-        switch(current.subsystemProperty) {
+        switch (current.subsystemProperty) {
             case Phase.NONE:
                 break;
             case Phase.REVSHOOT:
@@ -29,6 +30,9 @@ public class SubsystemPhaser {
             case Phase.PLACEGEAR:
                 placeGear();
                 break;
+            case Phase.EJECTGEAR:
+                ejectGear();
+                break;
             case Phase.REVSHOOTGEAR:
                 shooter.autoPrep(-1);
                 placeGear();
@@ -38,9 +42,18 @@ public class SubsystemPhaser {
                 break;
         }
     }
+
     public void placeGear() {
-        if(!calledCollect) {
+        if (!calledCollect) {
             collector.placeGear();
+            calledCollect = true;
+        }
+        collector.run();
+    }
+
+    public void ejectGear() {
+        if (!calledCollect) {
+            collector.placeGearAuto();
             calledCollect = true;
         }
         collector.run();

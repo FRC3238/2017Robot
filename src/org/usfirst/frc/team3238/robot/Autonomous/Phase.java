@@ -7,7 +7,7 @@ package org.usfirst.frc.team3238.robot.Autonomous;
  */
 
 public class Phase {
-    public static final int NONE = 0, REVSHOOT = 1, SHOOT = 2, PLACEGEAR = 3, REVSHOOTGEAR = 4, QUICKSHOT = 5;
+    public static final int NONE = 0, REVSHOOT = 1, SHOOT = 2, PLACEGEAR = 3, REVSHOOTGEAR = 4, QUICKSHOT = 5, EJECTGEAR = 6;
     double[][] leftProfile, rightProfile;
     boolean reverse, shoot = false, placeGear = false;
     double delay = 0.00;
