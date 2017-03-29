@@ -9,7 +9,15 @@ package org.usfirst.frc.team3238.robot.Autonomous;
 public class Phase {
     public static final int NONE = 0, REVSHOOT = 1, SHOOT = 2, PLACEGEAR = 3, REVSHOOTGEAR = 4, QUICKSHOT = 5, EJECTGEAR = 6;
     double[][] leftProfile, rightProfile;
-    boolean reverse, shoot = false, placeGear = false;
+    boolean reverse;
+    boolean shoot = false;
+    boolean placeGear = false;
+
+    public boolean isGearCheck() {
+        return gearCheck;
+    }
+
+    boolean gearCheck = false;
     double delay = 0.00;
 
     public int subsystemProperty = 0;
@@ -26,6 +34,10 @@ public class Phase {
     }
     public double getDelay() {
         return delay;
+    }
+    public void setGearCheck(boolean checkForGear)
+    {
+        gearCheck = checkForGear;
     }
     public double[][] getLeftProfile() {
         return leftProfile;

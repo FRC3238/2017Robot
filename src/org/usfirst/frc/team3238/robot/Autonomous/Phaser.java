@@ -2,6 +2,7 @@ package org.usfirst.frc.team3238.robot.Autonomous;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import org.usfirst.frc.team3238.robot.Robot;
 
 import java.util.ArrayList;
 
@@ -17,9 +18,10 @@ public class Phaser {
         PhaseCollection = new ArrayList<Phase>();
         skipCollection = new ArrayList<SkipCondition>();
     }
-    public void addPhase(Phase phase, SkipCondition condition) {
+    public Phase addPhase(Phase phase, SkipCondition condition) {
         PhaseCollection.add(phase);
         skipCollection.add(condition);
+        return phase;
     }
     public void addPhase(Phase phase)
     {
@@ -34,12 +36,19 @@ public class Phaser {
 
     public interface SkipCondition {
         public boolean skip();
+        public void reset();
     }
 
     public SkipCondition run = new SkipCondition() {
         @Override
         public boolean skip() {
+            Robot.say("Default skip condition is being called");
             return false;
+        }
+
+        @Override
+        public void reset() {
+
         }
     };
 
@@ -54,21 +63,7 @@ public class Phaser {
                         PhaseCollection.remove(0);
                         skipCollection.remove(0);
                     }
-                    if (PhaseCollection.size() > 1) {
-                        boolean skip = false;
-                        skipTimer.start();
-                        while(skipTimer.get() < 0.5)
-                        {
-                            skip = skipCollection.get(0).skip();
-                        }
-                        skipTimer.stop();
-                        skipTimer.reset();
-                        if (skip) {
-                            DriverStation.reportError("Gear is still onboard!", false);
-                            PhaseCollection.remove(0);
-                            skipCollection.remove(0);
-                        }
-                    }
+
                     return true;
                 } else {
                     return false;
@@ -80,6 +75,32 @@ public class Phaser {
             return false;
 
     }
+
+    public boolean isSkip() {
+        boolean skip = false;
+        if (PhaseCollection.size() >= 1) {
+//            boolean skip = false;
+            skipTimer.stop();
+            skipTimer.reset();
+            skipTimer.start();
+            while(skipTimer.get() < 0.5)
+            {
+                Robot.say("" + (skip = skipCollection.get(0).skip()));
+                Robot.say("isSkip is called with t=" + skipTimer.get());
+            }
+            skipCollection.get(0).reset();
+            skipTimer.stop();
+            skipTimer.reset();
+            if (skip) {
+                Robot.say("Gear is still onboard!");
+//                PhaseCollection.remove(0);
+//                skipCollection.remove(0);
+
+            }
+        }
+        return skip;
+    }
+
     public Phase getCurrentPhase() {
         if(PhaseCollection.size() > 0)
             return PhaseCollection.get(0);

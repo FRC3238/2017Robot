@@ -20,11 +20,14 @@ public class SubsystemPhaser {
     public void run(Phase current) {
         switch (current.subsystemProperty) {
             case Phase.NONE:
+                resetCalledCollect();
                 break;
             case Phase.REVSHOOT:
+                resetCalledCollect();
                 shooter.autoPrep(Constants.Shooter.SHOOT_RPM);
                 break;
             case Phase.SHOOT:
+                resetCalledCollect();
                 shooter.autoShoot();
                 break;
             case Phase.PLACEGEAR:
@@ -38,6 +41,7 @@ public class SubsystemPhaser {
                 placeGear();
                 break;
             case Phase.QUICKSHOT:
+                resetCalledCollect();
                 shooter.quickShoot();
                 break;
         }
@@ -49,6 +53,10 @@ public class SubsystemPhaser {
             calledCollect = true;
         }
         collector.run();
+    }
+
+    public void resetCalledCollect() {
+        calledCollect = false;
     }
 
     public void ejectGear() {

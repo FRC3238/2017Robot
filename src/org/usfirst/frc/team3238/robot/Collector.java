@@ -42,6 +42,7 @@ public class Collector implements Phaser.SkipCondition {
 
     void init() {
         state = "inactive";
+        setIntake(0.0);
     }
 
     public void placeGear() {
@@ -107,7 +108,7 @@ public class Collector implements Phaser.SkipCondition {
     }
     public boolean containsGear() {
 
-        gotGear = leftIntake.isRevLimitSwitchClosed();
+        boolean gotGear = leftIntake.isRevLimitSwitchClosed();
         if(!gotGear)
             setIntake(Constants.Collector.INTAKE_POWER/2);
         else
@@ -207,6 +208,12 @@ public class Collector implements Phaser.SkipCondition {
 
     @Override
     public boolean skip() {
+        DriverStation.reportError("Collector Skip is being called", false);
         return containsGear();
+    }
+
+    @Override
+    public void reset() {
+        init();
     }
 }

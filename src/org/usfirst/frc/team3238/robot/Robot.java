@@ -24,7 +24,7 @@ public class Robot extends IterativeRobot {
     private CANTalon.MotionProfileStatus _status = new CANTalon.MotionProfileStatus();
     PIDController turnController;
     boolean e = false;
-    int auto_selection = 0;
+    int auto_selection = 6;
     Phaser auto;
     Joystick joy1 = new Joystick(0);
     boolean RedSide = false;
@@ -109,7 +109,7 @@ public class Robot extends IterativeRobot {
         shooter = new Shooter(agitatorTalon, shooterTalon, joystick);
         setEncoderInversions();
         resetEncoderPosition();
-        CameraServer.getInstance().startAutomaticCapture();
+//        CameraServer.getInstance().startAutomaticCapture();
 //        CameraServer.getInstance().
         SubPhaser = new SubsystemPhaser(collector, shooter);
         SmartDashboard.putNumber("auto", auto_selection);
@@ -122,7 +122,7 @@ public class Robot extends IterativeRobot {
         if (talonsDisabled)
             System.exit(0);
         if (shooterDisabled)
-            DriverStation.reportWarning("No Shooter", false);
+//            DriverStation.reportWarning("No Shooter", false);
         shooter.init();
         resetEncoderPosition();
         auto_selection = (int) SmartDashboard.getNumber("auto", 0);
@@ -132,13 +132,18 @@ public class Robot extends IterativeRobot {
 
 
     }
-
+public static void say(String s) {
+        DriverStation.reportError(s, false);
+}
     int boilerChoice = 0;
 
     @Override
     public void autonomousInit() {
+        say("Your logging system is not that terrible");
+
         chassis.init();
         auto.PhaseCollection.clear();
+        auto.skipCollection.clear();
         SubPhaser.calledCollect = false;
         switch (auto_selection) {
             case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
@@ -185,7 +190,7 @@ public class Robot extends IterativeRobot {
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
 
                 auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE), collector);
+                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE), collector).setGearCheck(true);
 
                 break;
             case Constants.Autonomous.HOPPER_SHOOT:
@@ -213,7 +218,9 @@ public class Robot extends IterativeRobot {
         SubPhaser.run(auto.getCurrentPhase());
         notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT && auto.getCurrentPhase().subsystemProperty != Phase.QUICKSHOT;
     }
+    public void invertTalons() {
 
+    }
     @Override
     public void teleopInit() {
         collector.init();
@@ -288,12 +295,12 @@ public class Robot extends IterativeRobot {
 
     public boolean motionProfileLoop() {
         pollProfileStatus();
-        DriverStation.reportWarning(
-                "auto periodic: MP status = " + _status.toString(), false);
+//        DriverStation.reportWarning(
+//                "auto periodic: MP status = " + _status.toString(), false);
         if (notShooting)
             switch (controlStatus) {
                 case 0:
-                    DriverStation.reportWarning("auto case 0", false);
+//                    DriverStation.reportWarning("auto case 0", false);
                     _notifer.startPeriodic(0.005);
                     leftController.fillFed();
                     rightController.fillFed();
@@ -302,7 +309,7 @@ public class Robot extends IterativeRobot {
                     controlStatus++;
                     return e;
                 default:
-                    DriverStation.reportWarning("auto case 1", false);
+//                    DriverStation.reportWarning("auto case 1", false);
                     // _talon.set(CANTalon.SetValueMotionProfile.Enable.value);
                     if (!e) {
 
@@ -374,12 +381,14 @@ public class Robot extends IterativeRobot {
         rightLeader.changeMotionControlFramePeriod(5);
 
     }
-
+    public void setEncoderInversions(boolean b) {
+        rightLeader.reverseOutput(!b);
+        leftLeader.reverseSensor(!b);
+        rightLeader.reverseSensor(b);
+        leftLeader.reverseOutput(b);
+    }
     public void setEncoderInversions() {
-        rightLeader.reverseOutput(!competitionRobot);
-        leftLeader.reverseSensor(!competitionRobot);
-        rightLeader.reverseSensor(competitionRobot);
-        leftLeader.reverseOutput(competitionRobot);
+        setEncoderInversions(true);
     }
 
     public void setEncoderPID() {
@@ -464,8 +473,20 @@ public class Robot extends IterativeRobot {
     public void initMotionProfile() {
         setNewMotionProfile();
     }
-
+boolean temp = false;
     public void setNewMotionProfile() {
+        say("prechecking for gear");
+        if(auto.getCurrentPhase().isGearCheck()) {
+            if(auto.isSkip()) {
+                setEncoderInversions(false);
+                auto.PhaseCollection.clear();
+                auto.skipCollection.clear();
+
+                auto.addPhase(new Phase(retryGearLEFT.Points, retryGearRIGHT.Points, !RedSide, Phase.NONE));
+                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, !RedSide, Phase.PLACEGEAR));
+            }
+            say("checking for gear");
+        }
         e = false;
         prepEncodersForProfile();
 //        try {
