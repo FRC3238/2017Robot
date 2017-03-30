@@ -5,6 +5,12 @@ package org.usfirst.frc.team3238.robot.Autonomous;
  */
 public class HardcodedProfiles
 {
+    public static class emptyDelayt {
+        public static double[][] Points = new double[][]{
+                {0.0, 0.0, 3000.0}
+        };
+    }
+
     public static class boilerForwardFirst {
         public static double[][] Points = new double[][]{
                 {0.000026, 0.312477,10.0},
