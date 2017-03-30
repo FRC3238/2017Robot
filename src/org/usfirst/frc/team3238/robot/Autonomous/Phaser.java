@@ -27,6 +27,16 @@ public class Phaser {
     {
         addPhase(phase, run);
     }
+    public void insertPhase(Phase phase)
+    {
+        insertPhase(phase, run);
+    }
+    public Phase insertPhase(Phase phase, SkipCondition condition)
+    {
+        PhaseCollection.add(0, phase);
+        skipCollection.add(0, condition);
+        return phase;
+    }
     public double[][] initLeft() {
         return PhaseCollection.get(0).getLeftProfile();
     }

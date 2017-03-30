@@ -155,6 +155,7 @@ public static void say(String s) {
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
 
                 auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
 
                 break;
 
@@ -167,6 +168,7 @@ public static void say(String s) {
                 auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
 
                 auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
                 break;
 
             case Constants.Autonomous.CENTERSHOOT:
@@ -183,6 +185,7 @@ public static void say(String s) {
             case Constants.Autonomous.RETRIEVALSIDE:
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
                 auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
 
                 break;
 
@@ -226,7 +229,6 @@ public static void say(String s) {
         collector.init();
         chassis.init();
         setMotorsDriveMode();
-        collector.placeGearAuto();
     }
 
     @Override
@@ -478,12 +480,9 @@ boolean temp = false;
         say("prechecking for gear");
         if(auto.getCurrentPhase().isGearCheck()) {
             if(auto.isSkip()) {
-                setEncoderInversions(false);
-                auto.PhaseCollection.clear();
-                auto.skipCollection.clear();
-
-                auto.addPhase(new Phase(retryGearLEFT.Points, retryGearRIGHT.Points, !RedSide, Phase.NONE));
-                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, !RedSide, Phase.PLACEGEAR));
+                auto.insertPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+                auto.insertPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, !RedSide, Phase.PLACEGEAR));
+                auto.insertPhase(new Phase(retryGearLEFT.Points, retryGearRIGHT.Points, !RedSide, Phase.NONE));
             }
             say("checking for gear");
         }
