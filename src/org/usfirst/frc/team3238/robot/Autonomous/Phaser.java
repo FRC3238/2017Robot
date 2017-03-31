@@ -25,11 +25,14 @@ public class Phaser {
     }
     public boolean run(boolean finishedProfile) {
         if (finishedProfile) {
+            delayTimer.reset();
             delayTimer.start();
             if (PhaseCollection.size() > 1) {
+                while(delayTimer.get() < PhaseCollection.get(0).getDelay());
                 if (delayTimer.get() >= PhaseCollection.get(0).getDelay()) {
                     DriverStation.reportError("Delay Achieved", false);
 
+                    delayTimer.stop();
                     PhaseCollection.remove(0);
                     return true;
                 } else {

@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.util.BaseSystemNotInitializedException;
 import org.usfirst.frc.team3238.robot.Autonomous.*;
 import org.usfirst.frc.team3238.robot.Autonomous.Profiles.*;
 
-import java.sql.Driver;
 import java.util.ArrayList;
 
 public class Robot extends IterativeRobot implements PIDOutput {
@@ -129,10 +128,11 @@ public class Robot extends IterativeRobot implements PIDOutput {
         RedSide = SmartDashboard.getBoolean("Red Side", true);
         SmartDashboard.putNumber("Auto Found", auto_selection);
         notShooting = true;
-
+        invertAll = (boolean) SmartDashboard.getBoolean("invertAll", false);
+        setEncoderInversions(!invertAll);
 
     }
-
+    boolean invertAll = false;
     int boilerChoice = 0;
 
     @Override
@@ -140,15 +140,20 @@ public class Robot extends IterativeRobot implements PIDOutput {
         auto.PhaseCollection.clear();
         SubPhaser.calledCollect = false;
         SmartDashboard.putNumber("autosel", auto_selection);
-        auto_selection = Constants.Autonomous.MLG_HOPPER;
+//        auto_selection = Constants.Autonomous.MLG_HOPPER_BLUE;
 //        DriverStation.reportError("Auto Selected: " + auto_selection, false);
         switch (auto_selection) {
-            case Constants.Autonomous.MLG_HOPPER:
-                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, RedSide, Phase.NONE));
-                auto.addPhase(new Phase(HardcodedProfiles.emptyDelayt.Points, HardcodedProfiles.emptyDelayt.Points, true, Phase.NONE));
-                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, RedSide, Phase.NONE));
-                auto.addPhase(new Phase(hopperShootTurnLEFT.Points, hopperShootTurnRIGHT.Points, RedSide, Phase.REVSHOOT));
-//                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, RedSide, Phase.QUICKSHOT));
+            case Constants.Autonomous.MLG_HOPPER_BLUE:
+                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, false, Phase.NONE,2.0));
+                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(hopperShootTurnBlueLEFT.Points, hopperShootTurnBlueRIGHT.Points, false, Phase.REVSHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 10.0));
+                break;
+            case Constants.Autonomous.MLG_HOPPER_RED:
+                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, true, Phase.NONE,2.0));
+                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(hopperShootTurnRedLEFT.Points, hopperShootTurnRIGHT.Points, true, Phase.REVSHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.QUICKSHOT, 10.0));
                 break;
             case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
@@ -202,6 +207,14 @@ public class Robot extends IterativeRobot implements PIDOutput {
                 auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.REVSHOOT, 1.0));
                 auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.QUICKSHOT));
 break;
+            case Constants.Autonomous.SHOOT_THEN_GEAR_BLUE:
+                auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_RIGHT_BLUE, false, Phase.REVSHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 4));
+                auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_RIGHT_BLUE, false, Phase.NONE));
+                break;
+            case Constants.Autonomous.SHOOT_THEN_GEAR_RED:
+                auto.addPhase(new Phase(rightAngleTurnTestLEFT.Points, rightAngleTurnTestRIGHT.Points, !RedSide, Phase.NONE));
+                break;
         }
 
         initMotionProfile();
@@ -217,7 +230,7 @@ break;
         if (auto.run(motionProfileLoop())) setNewMotionProfile();
         DriverStation.reportWarning("" + auto.getCurrentPhase(), false);
         SubPhaser.run(auto.getCurrentPhase());
-        notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT && auto.getCurrentPhase().subsystemProperty != Phase.QUICKSHOT;
+//        notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT && auto.getCurrentPhase().subsystemProperty != Phase.QUICKSHOT;
     }
 
     @Override
@@ -431,7 +444,12 @@ break;
         rightLeader.changeMotionControlFramePeriod(5);
 
     }
-
+    public void setEncoderInversions(boolean b) {
+        rightLeader.reverseOutput(!b);
+        leftLeader.reverseSensor(!b);
+        rightLeader.reverseSensor(b);
+        leftLeader.reverseOutput(b);
+    }
     public void setEncoderInversions() {
         rightLeader.reverseOutput(false);
         leftLeader.reverseSensor(false);

@@ -5,9 +5,9 @@ package org.usfirst.frc.team3238.robot.Autonomous;
  */
 public class HardcodedProfiles
 {
-    public static class emptyDelayt {
+    public static class emptyProfile {
         public static double[][] Points = new double[][]{
-                {0.0, 0.0, 3000.0}
+                {0.0, 0.0, 10.0}
         };
     }
 
