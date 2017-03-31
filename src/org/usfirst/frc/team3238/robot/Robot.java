@@ -3,6 +3,7 @@ package org.usfirst.frc.team3238.robot;
 import com.ctre.CANTalon;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.BaseSystemNotInitializedException;
 import org.usfirst.frc.team3238.robot.Autonomous.*;
@@ -37,12 +38,23 @@ public class Robot extends IterativeRobot {
     public static final double fTalon = 0.415, pTalon = 3.0, kToleranceDegrees = 2.0;
     double rotateToAngleRate = 0.0;
     private int codesPerRev = 360;
-    boolean notShooting = true;
     boolean shooterDisabled = false;
     boolean talonsDisabled = false;
+    String selectedAuto;
+    SendableChooser<String> autoChooser = new SendableChooser<>();
 
     @Override
     public void robotInit() {
+        autoChooser.addDefault(Constants.Autonomous.DISABLED, Constants.Autonomous.DISABLED);
+        addChooserString(Constants.Autonomous.BOILER_GEAR);
+        addChooserString(Constants.Autonomous.BOILER_SHOOT);
+        addChooserString(Constants.Autonomous.CENTER_GEAR);
+        addChooserString(Constants.Autonomous.CENTER_SHOOT);
+        addChooserString(Constants.Autonomous.RETRIEVAL_GEAR);
+        addChooserString(Constants.Autonomous.RETRIEVAL_RUN);
+        addChooserString(Constants.Autonomous.MLG_HOPPER);
+        addChooserString(Constants.Autonomous.SHOOT_THEN_GEAR);
+        SmartDashboard.putData("Auto Selection", autoChooser);
         auto = new Phaser();
         CANTalon leftFollower = null;
         CANTalon rightFollower = null;
@@ -113,22 +125,24 @@ public class Robot extends IterativeRobot {
         SmartDashboard.putNumber("auto", auto_selection);
         SmartDashboard.putBoolean("Red Side", false);
     }
-    
+
+    public void addChooserString(String string) {
+        autoChooser.addObject(string, string);
+    }
+
     @Override public void disabledPeriodic()
     {
+        SmartDashboard.putString("Alliance", DriverStation.getInstance().getAlliance().toString());
+
         if(talonsDisabled)
             System.exit(0);
         if(shooterDisabled)
             DriverStation.reportWarning("No Shooter", false);
         shooter.init();
         resetEncoderPosition();
-//        DriverStation.reportError("Nav : " + navX.getAngle(), false);
-        auto_selection = (int) SmartDashboard.getNumber("auto", 0);
-        RedSide = SmartDashboard.getBoolean("Red Side", true);
-        SmartDashboard.putNumber("Auto Found", auto_selection);
-        notShooting = true;
-
-
+        RedSide = DriverStation.getInstance().getAlliance().toString().equals("Red");
+        selectedAuto = autoChooser.getSelected();
+        SmartDashboard.putString("Auto Selected", selectedAuto);
     }
 public static void say(String s) {
         DriverStation.reportError(s, false);
@@ -137,95 +151,156 @@ public static void say(String s) {
 
     @Override
     public void autonomousInit() {
-        say("Your logging system is not that terrible");
+        selectedAuto = autoChooser.getSelected();
+        say("Your auto is " + selectedAuto);
 
         chassis.init();
         auto.PhaseCollection.clear();
         auto.skipCollection.clear();
         SubPhaser.calledCollect = false;
-        SmartDashboard.putNumber("autosel", auto_selection);
-//        auto_selection = Constants.Autonomous.MLG_HOPPER_BLUE;
-//        DriverStation.reportError("Auto Selected: " + auto_selection, false);
-        switch (auto_selection) {
-            case Constants.Autonomous.MLG_HOPPER_BLUE:
-                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, false, Phase.NONE,2.0));
-                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, false, Phase.NONE));
-                auto.addPhase(new Phase(hopperShootTurnBlueLEFT.Points, hopperShootTurnBlueRIGHT.Points, false, Phase.REVSHOOT));
-                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 10.0));
+
+        switch (selectedAuto)
+        {
+            case Constants.Autonomous.DISABLED:
+                setupDisabledAuto();
                 break;
-            case Constants.Autonomous.MLG_HOPPER_RED:
-                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, true, Phase.NONE,2.0));
-                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, true, Phase.NONE));
-                auto.addPhase(new Phase(hopperShootTurnRedLEFT.Points, hopperShootTurnRIGHT.Points, true, Phase.REVSHOOT));
-                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.QUICKSHOT, 10.0));
+            case Constants.Autonomous.BOILER_GEAR:
+                setupBoilerGear();
                 break;
-            case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
-                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.QUICKSHOT));
+            case Constants.Autonomous.BOILER_SHOOT:
+                if(RedSide)
+                {
+                    setupBoilerShootRed();
+                } else  {
+                    setupBoilerShootBlue();
+                }
                 break;
-            case Constants.Autonomous.BOILERSIDE:
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
-
-                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
-
+            case Constants.Autonomous.CENTER_GEAR:
+                setupCenterGear();
                 break;
-
-            case Constants.Autonomous.BOILERSIDESHOOTBLUE:
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, false, Phase.NONE));
-                auto.addPhase(new Phase(HardcodedProfiles.sideBoilerShotBlueLeft.Points, HardcodedProfiles.sideBoilerShotBlueRight.Points, true, Phase.REVSHOOTGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.sideBoilerShotBlueLeft.Points, HardcodedProfiles.sideBoilerShotBlueRight.Points, true, Phase.QUICKSHOT));
+            case Constants.Autonomous.CENTER_SHOOT:
+                if(RedSide)
+                {
+                    setupCenterShootRed();
+                } else  {
+                    setupCenterShootBlue();
+                }
                 break;
-            case Constants.Autonomous.CENTER:
-                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
-
-                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+            case Constants.Autonomous.RETRIEVAL_GEAR:
+                setupRetrievalGear();
                 break;
-
-            case Constants.Autonomous.CENTERSHOOT:
-                auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
-
-                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, !RedSide, Phase.SHOOT));
-
-
-
+            case Constants.Autonomous.RETRIEVAL_RUN:
+                setupRetrievalRun();
                 break;
-            case Constants.Autonomous.TESTMODE:
-                auto.addPhase(new Phase(testerALEFT.Points, testerARIGHT.Points, !RedSide, Phase.NONE));//
-
-            case Constants.Autonomous.RETRIEVALSIDE:
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
-                auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
-
+            case Constants.Autonomous.MLG_HOPPER:
+                if(RedSide)
+                {
+                    setupMLGHopperRed();
+                } else
+                {
+                    setupMLGHopperBlue();
+                }
                 break;
-
-            case Constants.Autonomous.RETRIEVALNEUTRALZONE:
-                auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
-
-                auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR));
-                auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE), collector).setGearCheck(true);
-
-                break;
-            case Constants.Autonomous.HOPPER_SHOOT:
-                auto.addPhase(new Phase(HopperHitLEFT.Points, HopperHitRIGHT.Points, !RedSide, Phase.NONE));
-                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.REVSHOOT, 1.0));
-                auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.QUICKSHOT));
-break;
-            case Constants.Autonomous.SHOOT_THEN_GEAR_BLUE:
-                auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_RIGHT_BLUE, false, Phase.REVSHOOT));
-                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 4));
-                auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_RIGHT_BLUE, false, Phase.NONE));
-                break;
-            case Constants.Autonomous.SHOOT_THEN_GEAR_RED:
-                auto.addPhase(new Phase(rightAngleTurnTestLEFT.Points, rightAngleTurnTestRIGHT.Points, !RedSide, Phase.NONE));
+            case Constants.Autonomous.SHOOT_THEN_GEAR:
+                if(RedSide)
+                {
+                    setupShootThenGearRed();
+                } else
+                {
+                    setupShootThenGearBlue();
+                }
                 break;
         }
-
         initMotionProfile();
+    }
+
+    public void setupDisabledAuto() {
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.NONE));
+    }
+
+    public void setupShootThenGearRed() {
+        auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootRED.DriveToShotLocationPoints_LEFT_RED, normalStartToSideLiftWithStopToShootRED.DriveToShotLocationPoints_RIGHT_RED, true, Phase.REVSHOOT));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.QUICKSHOT, 4));
+        auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootRED.ContinueToLiftPoints_LEFT_RED, normalStartToSideLiftWithStopToShootRED.ContinueToLiftPoints_RIGHT_RED, true, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, true, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+    }
+
+    public void setupShootThenGearBlue() {
+        auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_RIGHT_BLUE, false, Phase.REVSHOOT));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 4));
+        auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_RIGHT_BLUE, false, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, false, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+    }
+
+    public void setupRetrievalRun() {
+        auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftNZ.Points, HardcodedProfiles.rightNZ.Points, !RedSide, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.finishNZL.Points, HardcodedProfiles.finishNZR.Points, !RedSide, Phase.NONE), collector).setGearCheck(true);
+    }
+
+    public void setupRetrievalGear() {
+        auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, !RedSide, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+    }
+
+    public void setupCenterShootBlue() {
+        auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, false, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, false, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+
+        auto.addPhase(new Phase(centerShootForwardLEFT.Points, centerShootForwardRIGHT.Points, false, Phase.REVSHOOT));
+        auto.addPhase(new Phase(centerShootCurveBlueLEFT.Points, centerShootCurveBlueRIGHT.Points, false, Phase.REVSHOOT));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 10.0));
+    }
+
+    public void setupCenterShootRed() {
+        auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, true, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points,true, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+        auto.addPhase(new Phase(centerShootForwardLEFT.Points, centerShootForwardRIGHT.Points, true, Phase.REVSHOOT));
+        auto.addPhase(new Phase(centerShootCurveRedLEFT.Points, centerShootCurveRedRIGHT.Points, true, Phase.REVSHOOT));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.QUICKSHOT, 10.0));
+    }
+
+    public void setupCenterGear() {
+        auto.addPhase(new Phase(HardcodedProfiles.centerLift.Points, HardcodedProfiles.centerLift.Points, RedSide, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+    }
+
+    public void setupBoilerShootBlue() {
+        auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, false, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.sideBoilerShotBlueLeft.Points, HardcodedProfiles.sideBoilerShotBlueRight.Points, true, Phase.REVSHOOTGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.sideBoilerShotBlueLeft.Points, HardcodedProfiles.sideBoilerShotBlueRight.Points, true, Phase.QUICKSHOT));
+    }
+
+    public void setupBoilerGear() {
+        auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftBack.Points, HardcodedProfiles.rightBack.Points, RedSide, Phase.PLACEGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.NONE), collector).setGearCheck(true);
+    }
+
+    public void setupBoilerShootRed() {
+        auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
+        auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
+        auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.QUICKSHOT));
+    }
+
+    public void setupMLGHopperRed() {
+        auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, true, Phase.NONE,2.0));
+        auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, true, Phase.NONE));
+        auto.addPhase(new Phase(hopperShootTurnRedLEFT.Points, hopperShootTurnRIGHT.Points, true, Phase.REVSHOOT));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.QUICKSHOT, 10.0));
+    }
+
+    public void setupMLGHopperBlue() {
+        auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, false, Phase.NONE,2.0));
+        auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, false, Phase.NONE));
+        auto.addPhase(new Phase(hopperShootTurnBlueLEFT.Points, hopperShootTurnBlueRIGHT.Points, false, Phase.REVSHOOT));
+        auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 10.0));
     }
 
     boolean doneO = false, d = false, c = false, b = false;
@@ -241,7 +316,6 @@ break;
 
         DriverStation.reportWarning("" + auto.getCurrentPhase(), false);
         SubPhaser.run(auto.getCurrentPhase());
-        notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT && auto.getCurrentPhase().subsystemProperty != Phase.QUICKSHOT;
     }
     
     @Override public void teleopInit()
@@ -311,9 +385,7 @@ break;
         pollProfileStatus();
         DriverStation.reportWarning(
                 "auto periodic: MP status = " + _status.toString(), false);
-        if(notShooting)
-        switch(controlStatus)
-        {
+        switch(controlStatus) {
             case 0:
                 DriverStation.reportWarning("auto case 0", false);
                 _notifer.startPeriodic(0.005);
@@ -326,46 +398,39 @@ break;
             default:
                 DriverStation.reportWarning("auto case 1", false);
                 // _talon.set(CANTalon.SetValueMotionProfile.Enable.value);
-                if(!e)
-                {
+                if (!e) {
 
-                        double motorOutput = leftLeader.getOutputVoltage()
-                                / leftLeader.getBusVoltage();
-                        double altMotorOutput = rightLeader.getOutputVoltage()
-                                / rightLeader.getBusVoltage();
-                        System.out.println("motor output: " + motorOutput);
-                        System.out.println("motor speed: " + leftLeader.getSpeed());
-                        System.out.println("error in native units: "
-                                + leftLeader.getClosedLoopError());
-                    }
+                    double motorOutput = leftLeader.getOutputVoltage()
+                            / leftLeader.getBusVoltage();
+                    double altMotorOutput = rightLeader.getOutputVoltage()
+                            / rightLeader.getBusVoltage();
+                    System.out.println("motor output: " + motorOutput);
+                    System.out.println("motor speed: " + leftLeader.getSpeed());
+                    System.out.println("error in native units: "
+                            + leftLeader.getClosedLoopError());
+                }
 
-                    DriverStation.reportError("Active Point Valid:" + _status.activePointValid + "\n" +
-                            "lastPoint: " + _status.activePoint.isLastPoint, false);
-                    if (_status.activePointValid && _status.activePoint.isLastPoint) {
-                        SmartDashboard.putNumber("Loops", controlCalls);
-                        DriverStation.reportWarning(
-                                "auto case default: profile done", false);
-                        leftLeader
-                                .set(CANTalon.SetValueMotionProfile.Disable.value);
-                        rightLeader
-                                .set(CANTalon.SetValueMotionProfile.Disable.value);
-                        DriverStation.reportWarning("# auto loops: " + controlCalls,
-                                false);
-                        System.out.println(leftLeader.getPosition());
-                        System.out.println(rightLeader.getPosition());
-                        e = true;
-                    }
+                DriverStation.reportError("Active Point Valid:" + _status.activePointValid + "\n" +
+                        "lastPoint: " + _status.activePoint.isLastPoint, false);
+                if (_status.activePointValid && _status.activePoint.isLastPoint) {
+                    SmartDashboard.putNumber("Loops", controlCalls);
+                    DriverStation.reportWarning(
+                            "auto case default: profile done", false);
+                    leftLeader
+                            .set(CANTalon.SetValueMotionProfile.Disable.value);
+                    rightLeader
+                            .set(CANTalon.SetValueMotionProfile.Disable.value);
+                    DriverStation.reportWarning("# auto loops: " + controlCalls,
+                            false);
+                    System.out.println(leftLeader.getPosition());
+                    System.out.println(rightLeader.getPosition());
+                    e = true;
+                }
 
                 controlCalls++;
 
                 return e;
         }
-        else {
-            leftLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
-            rightLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
-
-        }
-        return false;
     }
     public void resetDiagnostics()
     {
@@ -501,8 +566,6 @@ break;
         if(auto.PhaseCollection.size() > 0) {
             leftController.setFedProfile(auto.getCurrentProfileLeft());
             rightController.setFedProfile(auto.getCurrentProfileRight());
-        } else {
-            notShooting = false;
         }
     }
 }
