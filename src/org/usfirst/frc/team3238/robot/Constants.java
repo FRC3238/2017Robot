@@ -83,7 +83,8 @@ public class Constants
     }
     public class Autonomous {
         public static final int TESTMODE = -1, DISABLE = 0, BOILERSIDESHOOT = 1, BOILERSIDE = 2, CENTER = 3, CENTERSHOOT = 4, RETRIEVALSIDE = 5, RETRIEVALNEUTRALZONE = 6,
-        HOPPER_SHOOT = 7;
+        HOPPER_SHOOT = 7, MLG_HOPPER_BLUE = 9, MLG_HOPPER_RED = 10;
         public static final int BOILERSIDESHOOTBLUE = 8;
+        public static final int SHOOT_THEN_GEAR_BLUE = 11, SHOOT_THEN_GEAR_RED = 12;
     }
 }

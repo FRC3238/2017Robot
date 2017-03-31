@@ -11,7 +11,6 @@ import org.usfirst.frc.team3238.robot.Autonomous.Profiles.*;
 import java.util.ArrayList;
 
 public class Robot extends IterativeRobot {
-    private boolean competitionRobot = false;
     private Chassis chassis;
     private Collector collector;
     private Climber climber;
@@ -24,7 +23,7 @@ public class Robot extends IterativeRobot {
     private CANTalon.MotionProfileStatus _status = new CANTalon.MotionProfileStatus();
     PIDController turnController;
     boolean e = false;
-    int auto_selection = 6;
+    int auto_selection = 0;
     Phaser auto;
     Joystick joy1 = new Joystick(0);
     boolean RedSide = false;
@@ -84,12 +83,8 @@ public class Robot extends IterativeRobot {
         }
         Joystick joystick = new Joystick(Constants.Robot.MAIN_JOYSTICK_PORT);
 
-        try {
-            navX = new AHRS(SPI.Port.kMXP);
-        } catch (Exception e) {
-        }
         climber = new Climber(climbTalonOne, climbTalonTwo, joystick);
-        chassis = new Chassis(leftLeader, rightLeader, joystick, navX);
+        chassis = new Chassis(leftLeader, rightLeader,  joystick);
         chassis.setShooterDisabled(shooterDisabled);
         collector = new Collector(leftCollect, rightCollect, liftCollect,
                 joystick);
@@ -97,6 +92,9 @@ public class Robot extends IterativeRobot {
         leftFollower.set(leftLeader.getDeviceID());
         rightFollower.changeControlMode(CANTalon.TalonControlMode.Follower);
         rightFollower.set(rightLeader.getDeviceID());
+        try {
+            navX = new AHRS(SPI.Port.kMXP);
+        } catch(Exception e) {}
         leftLeader.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
         leftLeader.configEncoderCodesPerRev(codesPerRev);
         rightLeader.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
@@ -109,22 +107,22 @@ public class Robot extends IterativeRobot {
         shooter = new Shooter(agitatorTalon, shooterTalon, joystick);
         setEncoderInversions();
         resetEncoderPosition();
-//        CameraServer.getInstance().startAutomaticCapture();
+        CameraServer.getInstance().startAutomaticCapture();
 //        CameraServer.getInstance().
         SubPhaser = new SubsystemPhaser(collector, shooter);
         SmartDashboard.putNumber("auto", auto_selection);
         SmartDashboard.putBoolean("Red Side", false);
     }
-
-    @Override
-    public void disabledPeriodic() {
-        chassis.printAngle();
-        if (talonsDisabled)
+    
+    @Override public void disabledPeriodic()
+    {
+        if(talonsDisabled)
             System.exit(0);
-        if (shooterDisabled)
-//            DriverStation.reportWarning("No Shooter", false);
+        if(shooterDisabled)
+            DriverStation.reportWarning("No Shooter", false);
         shooter.init();
         resetEncoderPosition();
+//        DriverStation.reportError("Nav : " + navX.getAngle(), false);
         auto_selection = (int) SmartDashboard.getNumber("auto", 0);
         RedSide = SmartDashboard.getBoolean("Red Side", true);
         SmartDashboard.putNumber("Auto Found", auto_selection);
@@ -145,7 +143,22 @@ public static void say(String s) {
         auto.PhaseCollection.clear();
         auto.skipCollection.clear();
         SubPhaser.calledCollect = false;
+        SmartDashboard.putNumber("autosel", auto_selection);
+//        auto_selection = Constants.Autonomous.MLG_HOPPER_BLUE;
+//        DriverStation.reportError("Auto Selected: " + auto_selection, false);
         switch (auto_selection) {
+            case Constants.Autonomous.MLG_HOPPER_BLUE:
+                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, false, Phase.NONE,2.0));
+                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, false, Phase.NONE));
+                auto.addPhase(new Phase(hopperShootTurnBlueLEFT.Points, hopperShootTurnBlueRIGHT.Points, false, Phase.REVSHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 10.0));
+                break;
+            case Constants.Autonomous.MLG_HOPPER_RED:
+                auto.addPhase(new Phase(curveHitLEFT.Points, curveHitRIGHT.Points, true, Phase.NONE,2.0));
+                auto.addPhase(new Phase(hopperHitBackLEFT.Points, hopperHitBackRIGHT.Points, true, Phase.NONE));
+                auto.addPhase(new Phase(hopperShootTurnRedLEFT.Points, hopperShootTurnRIGHT.Points, true, Phase.REVSHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, true, Phase.QUICKSHOT, 10.0));
+                break;
             case Constants.Autonomous.BOILERSIDESHOOT: // BoilerSideLift
                 auto.addPhase(new Phase(HardcodedProfiles.leftBoiler.Points, HardcodedProfiles.rightBoiler.Points, RedSide, Phase.NONE));
                 auto.addPhase(new Phase(HardcodedProfiles.leftSideBoilerShot.Points, HardcodedProfiles.rightSideBoilerShot.Points, RedSide, Phase.REVSHOOTGEAR));
@@ -178,6 +191,7 @@ public static void say(String s) {
                 auto.addPhase(new Phase(HardcodedProfiles.leftCenterBoilerShot.Points, HardcodedProfiles.rightCenterBoilerShot.Points, !RedSide, Phase.SHOOT));
 
 
+
                 break;
             case Constants.Autonomous.TESTMODE:
                 auto.addPhase(new Phase(testerALEFT.Points, testerARIGHT.Points, !RedSide, Phase.NONE));//
@@ -200,7 +214,15 @@ public static void say(String s) {
                 auto.addPhase(new Phase(HopperHitLEFT.Points, HopperHitRIGHT.Points, !RedSide, Phase.NONE));
                 auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.REVSHOOT, 1.0));
                 auto.addPhase(new Phase(BoilerAlignLEFT.Points, BoilerAlignRIGHT.Points, !RedSide, Phase.QUICKSHOT));
-
+break;
+            case Constants.Autonomous.SHOOT_THEN_GEAR_BLUE:
+                auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.DriveToShotLocationPoints_RIGHT_BLUE, false, Phase.REVSHOOT));
+                auto.addPhase(new Phase(HardcodedProfiles.emptyProfile.Points, HardcodedProfiles.emptyProfile.Points, false, Phase.QUICKSHOT, 4));
+                auto.addPhase(new Phase(normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_LEFT_BLUE, normalStartToSideLiftWithStopToShootBLUE.ContinueToLiftPoints_RIGHT_BLUE, false, Phase.NONE));
+                break;
+            case Constants.Autonomous.SHOOT_THEN_GEAR_RED:
+                auto.addPhase(new Phase(rightAngleTurnTestLEFT.Points, rightAngleTurnTestRIGHT.Points, !RedSide, Phase.NONE));
+                break;
         }
 
         initMotionProfile();
@@ -209,8 +231,12 @@ public static void say(String s) {
     boolean doneO = false, d = false, c = false, b = false;
     String status = "0";
     int count = 0;
-    ArrayList<String> flow = new ArrayList<String>();
+    ArrayList<String> flow= new ArrayList<String>();
 
+    @Override
+    public void autonomousPeriodic() {
+        if (auto.run(motionProfileLoop())) setNewMotionProfile();
+        DriverStation.reportWarning("" + auto.getCurrentPhase(), false);
     @Override
     public void autonomousPeriodic() {
 //        chassis.printAngle();
@@ -221,11 +247,9 @@ public static void say(String s) {
         SubPhaser.run(auto.getCurrentPhase());
         notShooting = auto.getCurrentPhase().subsystemProperty != Phase.SHOOT && auto.getCurrentPhase().subsystemProperty != Phase.QUICKSHOT;
     }
-    public void invertTalons() {
-
-    }
-    @Override
-    public void teleopInit() {
+    
+    @Override public void teleopInit()
+    {
         collector.init();
         chassis.init();
         setMotorsDriveMode();
@@ -233,16 +257,7 @@ public static void say(String s) {
 
     @Override
     public void teleopPeriodic() {
-//        if (joy1.getRawButton(12)) {
-//            chassis.resetNavX();
-//        }
-//        if (joy1.getRawButton(9)) {
-//            chassis.rotateToAngle(90);
-//        }
-//        DriverStation.reportWarning("");
-//        chassis.printAngle();
-
-        chassis.run();
+        chassis.proRun();
         collector.run();
         climber.run();
         shooter.run();
@@ -282,38 +297,41 @@ public static void say(String s) {
     }
 
     Notifier _notifer = new Notifier(new PeriodicRunnable());
-
-    class PeriodicRunnable implements java.lang.Runnable {
-        public void run() {
+    class PeriodicRunnable implements java.lang.Runnable
+    {
+        public void run()
+        {
             leftLeader.processMotionProfileBuffer();
             rightLeader.processMotionProfileBuffer();
         }
     }
-
-    public void pollProfileStatus() {
+    public void pollProfileStatus()
+    {
         leftLeader.getMotionProfileStatus(_status);
         rightLeader.getMotionProfileStatus(_status);
     }
-
-    public boolean motionProfileLoop() {
+    public boolean motionProfileLoop()
+    {
         pollProfileStatus();
-//        DriverStation.reportWarning(
-//                "auto periodic: MP status = " + _status.toString(), false);
-        if (notShooting)
-            switch (controlStatus) {
-                case 0:
-//                    DriverStation.reportWarning("auto case 0", false);
-                    _notifer.startPeriodic(0.005);
-                    leftController.fillFed();
-                    rightController.fillFed();
-                    leftLeader.set(CANTalon.SetValueMotionProfile.Enable.value);
-                    rightLeader.set(CANTalon.SetValueMotionProfile.Enable.value);
-                    controlStatus++;
-                    return e;
-                default:
-//                    DriverStation.reportWarning("auto case 1", false);
-                    // _talon.set(CANTalon.SetValueMotionProfile.Enable.value);
-                    if (!e) {
+        DriverStation.reportWarning(
+                "auto periodic: MP status = " + _status.toString(), false);
+        if(notShooting)
+        switch(controlStatus)
+        {
+            case 0:
+                DriverStation.reportWarning("auto case 0", false);
+                _notifer.startPeriodic(0.005);
+                leftController.fillFed();
+                rightController.fillFed();
+                leftLeader.set(CANTalon.SetValueMotionProfile.Enable.value);
+                rightLeader.set(CANTalon.SetValueMotionProfile.Enable.value);
+                controlStatus++;
+                return e;
+            default:
+                DriverStation.reportWarning("auto case 1", false);
+                // _talon.set(CANTalon.SetValueMotionProfile.Enable.value);
+                if(!e)
+                {
 
                         double motorOutput = leftLeader.getOutputVoltage()
                                 / leftLeader.getBusVoltage();
@@ -325,7 +343,8 @@ public static void say(String s) {
                                 + leftLeader.getClosedLoopError());
                     }
 
-
+                    DriverStation.reportError("Active Point Valid:" + _status.activePointValid + "\n" +
+                            "lastPoint: " + _status.activePoint.isLastPoint, false);
                     if (_status.activePointValid && _status.activePoint.isLastPoint) {
                         SmartDashboard.putNumber("Loops", controlCalls);
                         DriverStation.reportWarning(
@@ -341,10 +360,10 @@ public static void say(String s) {
                         e = true;
                     }
 
-                    controlCalls++;
+                controlCalls++;
 
-                    return e;
-            }
+                return e;
+        }
         else {
             leftLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
             rightLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
@@ -352,27 +371,27 @@ public static void say(String s) {
         }
         return false;
     }
-
-    public void resetDiagnostics() {
+    public void resetDiagnostics()
+    {
         controlStatus = 0;
         controlCalls = 0;
         e = false;
     }
-
-    public void prepEncodersForProfile() {
+    public void prepEncodersForProfile()
+    {
         resetEncoderPosition();
         enableMotionProfileMode();
         setEncoderInversions();
         setEncoderPID();
         resetDiagnostics();
     }
-
-    public void resetEncoderPosition() {
+    public void resetEncoderPosition()
+    {
         leftLeader.setPosition(0);
         rightLeader.setPosition(0);
     }
-
-    public void enableMotionProfileMode() {
+    public void enableMotionProfileMode()
+    {
         leftLeader.clearMotionProfileTrajectories();
         leftLeader.changeControlMode(CANTalon.TalonControlMode.MotionProfile);
         leftLeader.set(CANTalon.SetValueMotionProfile.Disable.value);
@@ -390,10 +409,13 @@ public static void say(String s) {
         leftLeader.reverseOutput(b);
     }
     public void setEncoderInversions() {
-        setEncoderInversions(true);
+        rightLeader.reverseOutput(false);
+        leftLeader.reverseSensor(false);
+        rightLeader.reverseSensor(true);
+        leftLeader.reverseOutput(true);
     }
-
-    public void setEncoderPID() {
+    public void setEncoderPID()
+    {
         leftLeader.setF(fTalon);
         leftLeader.setP(pTalon);
         leftLeader.setI(0.0);
@@ -405,19 +427,19 @@ public static void say(String s) {
     }
 
     public void setLayeredProfile(int n) {
-        if (n == 1) {
+        if(n == 1) {
             leftController.setFedProfile(boilerStraightFirst);
 
             rightController.setFedProfile(boilerStraightFirst);
-        } else if (n == 2) {
+        } else if(n == 2) {
             leftController.setFedProfile(boilerStraightSecond);
 
 
             rightController.setFedProfile(boilerStraightSecond);
         }
     }
-
-    public void setMotorsDriveMode() {
+    public void setMotorsDriveMode()
+    {
         leftLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
         rightLeader.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
     }
@@ -427,45 +449,37 @@ public static void say(String s) {
         rightController.setFedProfile(centerLift);
 
     }
-
     public void setRetrievalProfile() {
         leftController.setFedProfile(retrievalStraightFirst);
         rightController.setFedProfile(retrievalStraightSecond);
         navX.zeroYaw();
     }
-
     public void setSideSpeedProfile() {
         leftController.setFedProfile(HardcodedProfiles.rightBoiler.Points);
         rightController.setFedProfile(HardcodedProfiles.leftBoiler.Points);
     }
-
     public void setSideSpeedProfileRet() {
         leftController.setFedProfile(HardcodedProfiles.leftBoiler.Points);
         rightController.setFedProfile(HardcodedProfiles.rightBoiler.Points);
 
     }
-
     public void setCenterProfile() {
         leftController.setFedProfile(HardcodedProfiles.centerLift.Points);
 
         rightController.setFedProfile(HardcodedProfiles.centerLift.Points);
     }
-
     public void setSideBoilerShotProfile() {
         leftController.setFedProfile(HardcodedProfiles.leftSideBoilerShot.Points);
         rightController.setFedProfile(HardcodedProfiles.rightSideBoilerShot.Points);
     }
-
     public void setCenterBoilerShotProfile() {
         leftController.setFedProfile(HardcodedProfiles.leftSideBoilerShot.Points);
         rightController.setFedProfile(HardcodedProfiles.rightSideBoilerShot.Points);
     }
-
     public void setNZMoveProfile() {
         leftController.setFedProfile(HardcodedProfiles.leftNZ.Points);
         rightController.setFedProfile(HardcodedProfiles.rightNZ.Points);
     }
-
     public void setNZEndProfile() {
         leftController.setFedProfile(HardcodedProfiles.finishNZL.Points);
 
@@ -475,7 +489,6 @@ public static void say(String s) {
     public void initMotionProfile() {
         setNewMotionProfile();
     }
-boolean temp = false;
     public void setNewMotionProfile() {
         say("prechecking for gear");
         if(auto.getCurrentPhase().isGearCheck()) {
@@ -489,7 +502,7 @@ boolean temp = false;
         e = false;
         prepEncodersForProfile();
 //        try {
-        if (auto.PhaseCollection.size() > 0) {
+        if(auto.PhaseCollection.size() > 0) {
             leftController.setFedProfile(auto.getCurrentProfileLeft());
             rightController.setFedProfile(auto.getCurrentProfileRight());
         } else {
