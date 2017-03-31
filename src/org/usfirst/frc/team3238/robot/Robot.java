@@ -235,10 +235,6 @@ break;
 
     @Override
     public void autonomousPeriodic() {
-        if (auto.run(motionProfileLoop())) setNewMotionProfile();
-        DriverStation.reportWarning("" + auto.getCurrentPhase(), false);
-    @Override
-    public void autonomousPeriodic() {
 //        chassis.printAngle();
         chassis.reportEncoders();
         if (auto.run(motionProfileLoop())) setNewMotionProfile();

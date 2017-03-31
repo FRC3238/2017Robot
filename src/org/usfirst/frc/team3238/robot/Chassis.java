@@ -9,9 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Created by BUTLEJEF000 on 1/16/2017.
  */
-public class Chassis implements PIDOutput, PIDController.Tolerance {
-    private AHRS navX;
-    private PIDController pid;
+public class Chassis {
     private RobotDrive driveTrain;
     private CANTalon leftLeader, rightLeader;
     private Joystick joy;
@@ -29,8 +27,7 @@ public class Chassis implements PIDOutput, PIDController.Tolerance {
 
     private static final double TOLERANCE_DEGREES = 2.0f;
 
-    Chassis(CANTalon leftTalonA, CANTalon rightTalonA, Joystick joy, AHRS navX) {
-        this.navX = navX;
+    Chassis(CANTalon leftTalonA, CANTalon rightTalonA, Joystick joy) {
         this.joy = joy;
 
         timer = new Timer();
@@ -39,29 +36,10 @@ public class Chassis implements PIDOutput, PIDController.Tolerance {
         this.leftLeader = leftTalonA;
         this.rightLeader = rightTalonA;
 
-        pid = new PIDController(P_CONST, I_CONST, D_CONST, navX, this);
-        pid.setInputRange(-180.0f, 180.0f);
-        pid.setOutputRange(-0.7, 0.7);
-//        pid.setAbsoluteTolerance(TOLERANCE_DEGREES);
-        pid.setTolerance(this);
-        pid.setContinuous(true);
-
-        LiveWindow.addActuator("DriveTrain", "TurnController", pid);
     }
 
-    public void printAngle() {
-        SmartDashboard.putNumber("Angle", navX.getYaw());
-        SmartDashboard.putString("Chassis state", state);
-    }
-
-    public void rotateToAngle(double degrees) {
-        pid.setSetpoint(degrees);
-        pid.enable();
-        state = "turning";
-    }
 
     public void init() {
-        pid.disable();
         state = "default";
     }
 
@@ -154,40 +132,7 @@ public class Chassis implements PIDOutput, PIDController.Tolerance {
                     state = "default";
                 }
                 break;
-            case "turning":
-                DriverStation.reportError("Turning to angle " + pid.getSetpoint() + " - " + navX.getAngle(), false);
-                SmartDashboard.putNumber("PID Error", pid.getError());
-                leftLeader.set(y + rotateRate);
-                rightLeader.set(-y + rotateRate);
-
-                if (pid.onTarget()) {
-                    onTargetCounter++;
-                } else {
-                    onTargetCounter = 0;
-                }
-
-                if (onTargetCounter > 7) {
-                    pid.disable();
-                    state = "default";
-                }
-                break;
         }
-    }
-
-    @Override
-    public void pidWrite(double output) {
-        rotateRate = output;
-    }
-
-    public void resetNavX() {
-        navX.reset();
-        state = "default";
-        pid.disable();
-    }
-
-    @Override
-    public boolean onTarget() {
-        return Math.abs(pid.getError()) < 2.0;
     }
 }
 
