@@ -1,7 +1,10 @@
 package org.usfirst.frc.team3238.robot;
 
 import com.ctre.CANTalon;
-import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -61,6 +64,10 @@ public class Shooter {
         } else {
             agitator.set(0);
         }
+    }
+
+    public void printTargetSpeed() {
+        SmartDashboard.putNumber("Shooter target", getRPM(distanceMap()));
     }
 
     public void quickShoot() {

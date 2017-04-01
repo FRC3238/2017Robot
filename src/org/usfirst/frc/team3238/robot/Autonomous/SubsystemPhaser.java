@@ -1,8 +1,8 @@
 package org.usfirst.frc.team3238.robot.Autonomous;
 
+import org.usfirst.frc.team3238.robot.Collector;
 import org.usfirst.frc.team3238.robot.Constants;
 import org.usfirst.frc.team3238.robot.Shooter;
-import org.usfirst.frc.team3238.robot.Collector;
 
 /**
  * Created by Team 3238 on 2/20/2017.

@@ -82,11 +82,6 @@ public class Constants
         public static final int ALLOWED_RPM_ERROR = 10;
     }
     public class Autonomous {
-        public static final int TESTMODE = -1, DISABLE = 0, BOILERSIDESHOOT = 1, BOILERSIDE = 2, CENTER = 3, CENTER_SHOOT_RED = 4, RETRIEVALSIDE = 5, RETRIEVALNEUTRALZONE = 6,
-        HOPPER_SHOOT = 7, MLG_HOPPER_BLUE = 9, MLG_HOPPER_RED = 10;
-        public static final int BOILERSIDESHOOTBLUE = 8;
-        public static final int SHOOT_THEN_GEAR_BLUE = 11, SHOOT_THEN_GEAR_RED = 12, CENTER_SHOOT_BLUE = 13;
-
         public static final String DISABLED = "Disabled";
         public static final String BOILER_GEAR = "Boiler Gear";
         public static final String BOILER_SHOOT = "Boiler Gear + Shoot";
@@ -96,5 +91,6 @@ public class Constants
         public static final String RETRIEVAL_RUN = "Retrieval Gear + Run";
         public static final String MLG_HOPPER = "MLG HOPPER!!!!";
         public static final String SHOOT_THEN_GEAR = "Shoot then place";
+        public static final String BOILER_RUN = "Boiler Gear + Run";
     }
 }
