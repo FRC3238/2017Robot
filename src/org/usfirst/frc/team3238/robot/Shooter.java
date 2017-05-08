@@ -33,7 +33,9 @@ public class Shooter {
         this.shooter = shooter;
 
     }
-
+  public void setJoy(Joystick jo) {
+    joy = jo;
+    }
     public void init() {
         shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
         shooter.set(0.0);
