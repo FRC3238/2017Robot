@@ -16,20 +16,20 @@ class Climber
         this.joy = joy;
         this.climbTalonOne = climbTalonOne;
         this.climbTalonTwo = climbTalonTwo;
-        climbTalonOne.set(0.0);
-        climbTalonTwo.set(0.0);
+        this.climbTalonOne.enableBrakeMode(false);
+        this.climbTalonTwo.enableBrakeMode(false);
     }
-    
+    public void setJoy(Joystick jo) {
+    joy = jo;
+    }
     void run()
     {
-        climbTalonOne.enableBrakeMode(true);
-        climbTalonTwo.enableBrakeMode(true);
-        if(joy.getRawButton(Constants.Climber.CLIMBER_UP_BUTTON))
+        if(joy.getRawButton(Constants.Climber.CLIMBER_SLOW_BUTTON))
+        {
+            set(Constants.Climber.CLIMBER_SLOW_VALUE);
+        } else if(joy.getRawButton(Constants.Climber.CLIMBER_UP_BUTTON))
         {
             set(Constants.Climber.CLIMBER_GO_UP_VALUE);
-        } else if(joy.getRawButton(Constants.Climber.CLIMBER_DOWN_BUTTON))
-        {
-            set(Constants.Climber.CLIMBER_GO_DOWN_VALUE);
         } else
         {
             set(0.0);
@@ -40,12 +40,6 @@ class Climber
     {
         climbTalonOne.set(power);
         climbTalonTwo.set(power);
-    }
-    
-    void disabled()
-    {
-        climbTalonOne.enableBrakeMode(false);
-        climbTalonTwo.enableBrakeMode(false);
     }
 }
 

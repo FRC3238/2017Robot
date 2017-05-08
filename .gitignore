@@ -65,3 +65,4 @@ $RECYCLE.BIN/
 # IntelliJ IDEA files
 .idea/
 *.iml
+/bin/
