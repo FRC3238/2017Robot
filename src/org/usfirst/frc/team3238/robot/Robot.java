@@ -25,6 +25,8 @@ public class Robot extends IterativeRobot {
     int auto_selection = 0;
     Phaser auto;
     Joystick joy1 = new Joystick(0);
+    Joystick overrideJoy;
+    boolean override = false;
     boolean RedSide = false;
     MotionProfileExample leftController, rightController;
     public static final double kP = 0.05,
@@ -65,6 +67,7 @@ public class Robot extends IterativeRobot {
         CANTalon agitatorTalon = null;
         CANTalon shooterTalon = null;
         try {
+            overrideJoy = new Joystick(Constants.Robot.OVERRIDE_JOYSTICK_PORT);
             leftLeader = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_A);
             leftFollower = new CANTalon(Constants.Chassis.DRIVE_TALON_ID_LEFT_B);
             rightLeader = new CANTalon(
@@ -324,10 +327,28 @@ public class Robot extends IterativeRobot {
 
     @Override
     public void teleopPeriodic() {
+        checkOverride()
         chassis.proRun();
         collector.run();
         climber.run();
         shooter.run();
+        
+    }
+    public boolean checkOverride() {
+        if(Math.abs(overrideJoystick.getY() > 0.18)) {
+        override = true;
+            chassis.setJoy(overrideJoystick);
+            collector.setJoy(overrideJoystick);
+            climber.setJoy(overrideJoystick);
+            shooter.setJoy(overrideJoystick);
+        } else if(overrideJoystick.getRawButton(11) == true) {
+        override = false;
+            chassis.setJoy(joy1);
+            collector.setJoy(joy1);
+            climber.setJoy(joy1);
+            shooter.setJoy(joy1);
+        }
+        return override;
     }
 
     @Override
