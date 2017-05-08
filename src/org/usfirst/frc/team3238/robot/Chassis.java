@@ -37,7 +37,9 @@ public class Chassis {
         this.rightLeader = rightTalonA;
 
     }
-
+    public void setJoy(Joystick jo) {
+    joy = jo;
+    }
 
     public void init() {
         state = "default";
