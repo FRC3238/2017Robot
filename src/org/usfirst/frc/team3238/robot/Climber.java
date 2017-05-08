@@ -19,7 +19,9 @@ class Climber
         this.climbTalonOne.enableBrakeMode(false);
         this.climbTalonTwo.enableBrakeMode(false);
     }
-    
+    public void setJoy(Joystick jo) {
+    joy = jo;
+    }
     void run()
     {
         if(joy.getRawButton(Constants.Climber.CLIMBER_SLOW_BUTTON))
