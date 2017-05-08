@@ -24,6 +24,7 @@ public class Constants
     public class Robot
     {
         public static final int MAIN_JOYSTICK_PORT = 0;
+        public static final int OVERRIDE_JOYSTICK_PORT = 1;
     }
     
     public class Climber
