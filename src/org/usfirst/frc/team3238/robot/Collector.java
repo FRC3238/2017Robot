@@ -39,7 +39,9 @@ public class Collector implements Phaser.SkipCondition {
         timer = new Timer();
         state = "inactive";
     }
-
+  public void setJoy(Joystick jo) {
+    joy = jo;
+    }
     void init() {
         state = "inactive";
         setIntake(0.0);
